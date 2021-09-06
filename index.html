@@ -116,15 +116,15 @@ const elements = {
 	stats:   ["STR", "DEX", "CON", "INT", "WIS", "CHA"].map(e => { return { name: e }; }),
 	saves:   [
 		{ name: "Fortitutde",	stat: "CON" },
-		{ name: "Reflex",		stat: "DEX" },
-		{ name: "Will",			stat: "WIS" },
+		{ name: "Reflex",	stat: "DEX" },
+		{ name: "Will",		stat: "WIS" },
 	],
 	skills: [
 		{ name: "Acrobatics", 		untrained: true,  acp: true,  stat: "DEX" },
 		{ name: "Athletics", 		untrained: true,  acp: true,  stat: "STR" },
-		{ name: "Bluff", 			untrained: true,  acp: false, stat: "CHA" },
+		{ name: "Bluff", 		untrained: true,  acp: false, stat: "CHA" },
 		{ name: "Computers", 		untrained: false, acp: false, stat: "INT" },
-		{ name: "Culture", 			untrained: false, acp: false, stat: "INT" },
+		{ name: "Culture", 		untrained: false, acp: false, stat: "INT" },
 		{ name: "Diplomacy", 		untrained: true,  acp: false, stat: "CHA" },
 		{ name: "Disguise", 		untrained: true,  acp: false, stat: "CHA" },
 		{ name: "Engineering", 		untrained: false, acp: false, stat: "INT" },
@@ -133,11 +133,11 @@ const elements = {
 		{ name: "Medicine", 		untrained: false, acp: false, stat: "INT" },
 		{ name: "Mysticism", 		untrained: false, acp: false, stat: "WIS" },
 		{ name: "Perception", 		untrained: true,  acp: false, stat: "WIS" },
-		{ name: "Physical Science", untrained: false, acp: false, stat: "INT" },
+		{ name: "Physical Science", 	untrained: false, acp: false, stat: "INT" },
 		{ name: "Piloting", 		untrained: true,  acp: false, stat: "DEX" },
 		{ name: "Sense Motive", 	untrained: true,  acp: false, stat: "WIS" },
 		{ name: "Sleight of Hand", 	untrained: false, acp: true,  stat: "DEX" },
-		{ name: "Stealth", 			untrained: true,  acp: true,  stat: "DEX" },
+		{ name: "Stealth", 		untrained: true,  acp: true,  stat: "DEX" },
 		{ name: "Survival", 		untrained: true,  acp: false, stat: "WIS" }
 	]
 };
@@ -153,7 +153,7 @@ const dom = {
 		if (listeners) Object.keys(listeners).forEach(e => element.addEventListener(e, listeners[e]));
 		return element;
 	},
-  select: function(parent, options, value, hideable) {
+  	select: function(parent, options, value, hideable) {
 		if (hideable && value) {
 			return dom.create("input", { type: "hidden", value: value }, parent);
 		} else {
@@ -167,7 +167,7 @@ const dom = {
 			return select;
 		}
 	},
-  field: function(parent, name, value) {
+  	field: function(parent, name, value) {
 		var box = dom.create("div", {className: "box", id: name.toLowerCase()}, parent);
 		dom.create("span", {className: "label", innerHTML: name}, box);
 		dom.create("span", {className: "value", innerHTML: value}, box);
@@ -183,7 +183,7 @@ const bonus = {
 	_reg: new Set(),
 	_global: Object.entries(elements).flatMap(kv => kv[1].map(e => { return { name: e.name, label: "["+kv[0]+"] "+e.name}; })),
 	type: ["untyped", "insight", "morale", "circumstance", "divine", "enhancement", "luck"],
-  entry: function(parent, id, target, type, removable, value) {
+  	entry: function(parent, id, target, type, removable, value) {
 		return this._widget(id, dom.create("div", {className: "entry"}, parent), {
 			removable: removable,
 			get: function() {
@@ -192,7 +192,7 @@ const bonus = {
 					return acc;
 				}), {id: this.id});
 			},
-      set: function(bonus) {
+			set: function(bonus) {
 				Object.keys(this.fields).forEach(f => { if(!this.fields[f].disabled) this.fields[f].value = bonus[f] });
 			},
 			build: function() {
@@ -203,9 +203,9 @@ const bonus = {
 				};
 				if (removable) dom.create("span", {className: "remove"}, this, { click: this.removeElement.bind(this) });
 			}
-    });
-  },
-  grid: function(parent, id, name, target, type, fixed) {
+    		});
+  	},
+  	grid: function(parent, id, name, target, type, fixed) {
 		return this._widget(id, dom.create("div", {className: "grid"}, parent), {
 			target: target,
 			type: type,
@@ -214,7 +214,7 @@ const bonus = {
 			add: function() {
 				return bonus.entry(this.grid, this.id, this.target, this.type, true, this.fixed);
 			},
-      set: function(bonus) {
+      			set: function(bonus) {
 				this.add().set(bonus);
 			},
 			build: function() {
@@ -224,7 +224,7 @@ const bonus = {
 			}
 		});
 	},
-  _widget: function(id, container, args) {
+  	_widget: function(id, container, args) {
 		var widget = Object.assign({
 			id: id.toLowerCase(),
 			_dom: container,
@@ -240,7 +240,7 @@ const bonus = {
 		this._reg.add(widget);
 		return widget;
 	},
-  edit: function(bonuses) {
+  	edit: function(bonuses) {
 		this.bonuses = bonuses || [];
 		this._reg = new Set();
 		var edit = dom.get("edit");
@@ -251,9 +251,9 @@ const bonus = {
 		bonus.entry("race", "race_hp", "general:HP", "racial");
 		bonus.grid("race", "race_stats", null, "stats", "racial");
 		bonus.grid("race", "race_other", "other bonuses", null, "racial");
-		bonus.entry("theme", "theme_stat", "stats", "theme", false, true);
-		bonus.entry("theme", "theme_skill", "skills", "theme", false, true);
-    var saves = dom.category("class", "class_saves", "saves");
+		bonus.entry("theme", "theme_stat", "stats", "theme", false, 1);
+		bonus.entry("theme", "theme_skill", "skills", "theme", false, 1);
+    		var saves = dom.category("class", "class_saves", "saves");
 		["HP","SP"].forEach(t => bonus.entry("class", "class_base_"+t, "general:"+t, "class"));
 		bonus.entry("class", "class_base_rp", "general:RP", "class", false, elements.stats.map(s => s.name));
 		bonus.entry("class", "class_base_bab", "internal:BAB", "class", false, ["full", "partial"]);
@@ -261,7 +261,7 @@ const bonus = {
 		bonus.grid("class", "class_skills", "class skills", "skills", "class", true);
 		bonus.grid("class", "class_other", "other bonuses");
 		elements.skills.forEach(s => bonus.entry("ranks", "ranks_"+s.name, "skills:"+s.name, "rank"));
-    ["KAC", "EAC"].forEach(t => bonus.entry("armor", "armor_"+t, "general:"+t, "armor"));
+    		["KAC", "EAC"].forEach(t => bonus.entry("armor", "armor_"+t, "general:"+t, "armor"));
 		["ACP", "Max Dex"].forEach(t => bonus.entry("armor", "armor_"+t, "internal:"+t, "armor"));
 		bonus.grid("edit", "feats", "feat bonus");
 		bonus.grid("edit", "other", "other bonus");
@@ -270,8 +270,8 @@ const bonus = {
 				if (bonus.id && !widget.removable && bonus.id.startsWith(widget.id)) widget.set(bonus);
 			});
 		});
-  },
-  show: function(bonuses) {
+  	},
+  	show: function(bonuses) {
 		this.bonuses = bonuses || [];
 		var display = dom.get("display");
 		while (display.firstChild) display.removeChild(display.firstChild);
@@ -290,11 +290,11 @@ const bonus = {
 				.forEach(n => dom.field(container, n, this.calculate(n)));
 		});
 	},
-  list: function() {
+ 	list: function() {
 		this.bonuses = Array.from(this._reg).map(e => e.get());
 		return this.bonuses;
 	},
-  get: function(target, filter) {
+  	get: function(target, filter) {
 		var map = this.bonuses
 			.filter(b => b.target == target)
 			.filter((typeof filter == "string") ? (b => b.type == filter) : filter || (b => true ))
@@ -307,7 +307,7 @@ const bonus = {
 		bonus.type.forEach(b => map[b] ? map.all.push(map[b]) : true);
 		return map.all;
 	},
-  calculate: function(target) {
+  	calculate: function(target) {
 		if (formula[target]) return formula[target]();
 		var category = Object.keys(elements).find(category => elements[category].some(e => e.name == target));
 		if (category && formula[category]) return formula[category](target);
@@ -317,7 +317,7 @@ const bonus = {
 		}
 		return this.sum(target);
 	},
-  sum: function(target) {
+  	sum: function(target) {
 		var list = (typeof target == "string") ? bonus.get(target) : target;
 		return list.map(this.evaluate).reduce((acc, curr) => acc + curr, 0);
 	},
@@ -325,7 +325,8 @@ const bonus = {
 		try {
 			if (!target.bonus) return 0;
 			with(base) {
-				return parseInt(eval(target.bonus));
+				var result = parseInt(eval(target.bonus));
+				retrun isNaN(result) ? 0 : result;
 			}
 		} catch (e) {
 			return 0;
@@ -350,11 +351,11 @@ const formula = {
 		var acp  = skill.acp ? bonus.calculate("ACP") : 0;
 		return stat + csb + ranks + acp + other;
 	},
-  statBonus: stat => Math.floor((bonus.calculate(stat)-10)/2),
+	 statBonus: stat => Math.floor((bonus.calculate(stat)-10)/2),
 	saves: save => bonus.sum(save) + base[elements.saves.find(s => s.name == save).stat],
 	"Speed": ()=> bonus.get("Speed").map(s => s.bonus).join(", "),
 	"HP": ()=> bonus.sum("HP") + (bonus.sum(bonus.get("HP", "class")) * (base.level - 1)),
-  "SP": ()=> bonus.sum("SP") + base.CON + ((bonus.sum(bonus.get("SP", "class")) + base.CON) * (base.level - 1)),
+  	"SP": ()=> bonus.sum("SP") + base.CON + ((bonus.sum(bonus.get("SP", "class")) + base.CON) * (base.level - 1)),
 	"Max Dex": () => bonus.get("Max Dex").length ? bonus.get("Max Dex").map(bonus.evaluate).reduce(Math.min) : base.DEX,
 	"AC": ()=> 10 + Math.min(base.DEX, bonus.calculate("Max Dex")) + bonus.sum("AC"),
 	"KAC": ()=> formula.AC() + bonus.sum("KAC"),
@@ -367,14 +368,14 @@ const site = {
 		this.button = dom.create("span", { className: "button" }, "header", { click: this.toggle.bind(this) });
 		this.showDisplay(true);
 	},
-  load: function() {
+  	load: function() {
 		var storage = localStorage.getItem("bonuses");
 		return storage ? JSON.parse(storage).filter(e => e) : [];
 	},
 	save: function() {
 		localStorage.setItem("bonuses", JSON.stringify(bonus.list()));
 	},
-  showDisplay: function(initial) {
+  	showDisplay: function(initial) {
 		dom.get("display").style.display = "initial";
 		dom.get("edit").style.display = "none";
 		this.button.innerHTML = "edit";
@@ -387,7 +388,7 @@ const site = {
 		this.button.innerHTML = "save";
 		bonus.edit(this.load());
 	},
-  toggle: function() {
+  	toggle: function() {
 		this._t = typeof this._t == "undefined" ? 0 : this._t+1;
 		if (this._t%2 == 0) this.showEdit();
 		else this.showDisplay();
