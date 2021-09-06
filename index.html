@@ -15,6 +15,16 @@
 	background-color: black;
 	padding: 0em 0.2em;
 }
+#header span {
+	display: inline-block;
+	padding: 0.2em 0.5em;
+	margin: 0.2em 2em 0em 0em;
+}
+.button {
+	float: right;
+	background-color: blue;
+	border-radius: 0.2em;
+}
 body {
 	font-size: 16pt;
 	margin-top: 2.2em;
@@ -98,13 +108,6 @@ select:disabled {
 	height: 1em;
 	text-align: center;
 	margin: 0.3em 0.2em 0em 0.5em;
-}
-.button {
-	float: right;
-	background-color: blue;
-	border-radius: 0.2em;
-	padding: 0.2em 0.5em;
-	margin: 0.2em 2em 0em 0em;
 }
 		</style>
 	</head>
@@ -365,6 +368,7 @@ const formula = {
 const site = {
 	init: function() {
 		["header", "edit", "display"].forEach(id => dom.create("div", {id: id}, document.body));
+		dom.create("span", { innerHTML: "Starfinder Character Sheet" }, "header");
 		this.button = dom.create("span", { className: "button" }, "header", { click: this.toggle.bind(this) });
 		this.showDisplay(true);
 	},
