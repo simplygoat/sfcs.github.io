@@ -326,7 +326,7 @@ const bonus = {
 			if (!target.bonus) return 0;
 			with(base) {
 				var result = parseInt(eval(target.bonus));
-				retrun isNaN(result) ? 0 : result;
+				return isNaN(result) ? 0 : result;
 			}
 		} catch (e) {
 			return 0;
