@@ -87,9 +87,6 @@ body, input, select {
 	width: 3em;
 	text-align: end;
 }
-.entry .remove::before {
-	content: "x";
-}
 input, select {
 	border: none;
 	border-radius: 0;
@@ -103,10 +100,16 @@ select:disabled {
    	-moz-appearance: none;
 }
 .grid span.add::before {
-	display: inline-block;
 	content: "+";
 	color: white;
 	background-color: green;
+}
+.entry .remove::before {
+	content: "X";
+	border: 1px solid black;
+}
+.grid span.add::before, .entry .remove::before {
+	display: inline-block;
 	border-radius: 0.2em;
 	width: 1em;
 	height: 1em;
