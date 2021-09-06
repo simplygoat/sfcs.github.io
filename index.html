@@ -361,10 +361,11 @@ const formula = {
 		var other = bonus.sum(all.filter(b => !["class","theme","rank"].includes(b.type)));
 		var stat = base[skill.stat];
 		var acp  = skill.acp ? bonus.calculate("ACP") : 0;
-		return stat + csb + ranks + acp + other;
+		var val = stat + csb + ranks + acp + other;
+		return val >= 0 ? "+" + val : val;
 	},
 	 statBonus: stat => Math.floor((bonus.calculate(stat)-10)/2),
-	saves: save => bonus.sum(save) + base[elements.saves.find(s => s.name == save).stat],
+	saves: save => "+" + (bonus.sum(save) + base[elements.saves.find(s => s.name == save).stat]),
 	"Speed": ()=> bonus.get("Speed").map(s => s.bonus).join(", "),
 	"HP": ()=> bonus.sum("HP") + (bonus.sum(bonus.get("HP", "class")) * (base.level - 1)),
   	"SP": ()=> bonus.sum("SP") + base.CON + ((bonus.sum(bonus.get("SP", "class")) + base.CON) * (base.level - 1)),
@@ -372,8 +373,8 @@ const formula = {
 	"AC": ()=> 10 + Math.min(base.DEX, bonus.calculate("Max Dex")) + bonus.sum("AC"),
 	"KAC": ()=> formula.AC() + bonus.sum("KAC"),
 	"EAC": ()=> formula.AC() + bonus.sum("EAC"),
-	"Initiative": ()=> bonus.sum("Initiative") + base.DEX,
-	"To Hit": ()=> bonus.sum("To Hit") + bonus.sum("BAB") + base[base.attackType == "ranged" ? "DEX" : "STR"],
+	"Initiative": ()=> "+" + (bonus.sum("Initiative") + base.DEX),
+	"To Hit": ()=> "+" + (bonus.sum("To Hit") + bonus.sum("BAB") + base[base.attackType == "ranged" ? "DEX" : "STR"]),
 	"Damage": function(target) {
 		var type = bonus.get("");
 		var result = bonus.get("Damage").reduce((acc,curr)=>{
