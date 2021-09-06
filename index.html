@@ -193,7 +193,7 @@ const bonus = {
 				}), {id: this.id});
 			},
 			set: function(bonus) {
-				Object.keys(this.fields).forEach(f => { if(!this.fields[f].disabled) this.fields[f].value = bonus[f] });
+				Object.keys(this.fields).forEach(f => { if(!this.fields[f].disabled && this.fields[f].type != "hidden") this.fields[f].value = bonus[f] });
 			},
 			build: function() {
 				this.fields = {
