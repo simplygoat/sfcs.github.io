@@ -1,0 +1,398 @@
+<html>
+	<head>
+		<style>
+#header {
+	position: fixed;
+	width: 100%;
+	top: 0px;
+	left: 0px;
+	height: 2em;
+}
+#header, .header {
+	display: block;
+	color: white;
+	background-color: black;
+	padding: 0em 0.2em;
+}
+body {
+	margin-top: 2.2em;
+}
+.category, .grid {
+	max-width: 30em;
+	margin: 1em 0.5em;
+	border: 1px solid black;
+}
+.category:not(#skills) .displayContainer {
+	display: flex;
+	flex-wrap: wrap;
+}
+.category:not(#skills) .box:not(#speed) {
+	flex-grow: 1;
+	display: inline-block;
+	margin: 0.2em;
+	border: 1px solid black;
+}
+.category:not(#skills) .box:not(#speed) > span {
+	display: block;
+    text-align: center;
+}
+.category:not(#skills) .box:not(#speed) > .value {
+	font-size: 2em;
+}
+.box#speed {
+	margin: 0.2em;
+	flex-basis: 100%;
+}
+#skills .displayContainer {
+	columns: 10em 2;
+}
+#skills .box {
+	border-bottom: 1px solid black;
+	margin: 0.2em;
+	max-width: 10em;
+}
+#skills .label {
+	display: inline-block;
+	width: 8em;
+}
+#skills .value {
+	display: inline-block;
+	width: 2em;
+	text-align: end;
+}
+.entry {
+	margin: 0.2em 0em 0.2em 0.5em;
+}
+.entry select {
+	min-width: 5em;
+}
+.entry input[type="text"]{
+	width: 3em;
+	text-align: end;
+}
+.entry .remove::before {
+	content: "x";
+}
+input, select {
+	border: none;
+	border-radius: 0;
+	border-bottom: 1px solid black;
+	padding-right: 0.2em;
+}
+select:disabled {
+	opacity: 1;
+	color: black;
+	-webkit-appearance: none;
+    -moz-appearance: none;
+    padding-bottom: 1px;
+}
+.grid span.add::before {
+	display: inline-block;
+	content: "+";
+	color: white;
+	background-color: green;
+	border-radius: 0.2em;
+	width: 1em;
+	height: 1em;
+	text-align: center;
+	margin: 0.3em 0.2em 0em 0.5em;
+}
+.button {
+	float: right;
+	background-color: blue;
+	border-radius: 0.2em;
+	padding: 0.2em 0.5em;
+	margin: 0.2em 2em 0em 0em;
+}
+		</style>
+	</head>
+	<body>
+		<script>
+const elements = {
+	general: ["KAC", "EAC", "HP", "SP", "RP", "Initiative", "Speed"].map(e => { return { name: e }; }),
+	internal:["Level", "AC", "ACP", "Max Dex", "BAB"].map(e => { return { name: e }; }),
+	stats:   ["STR", "DEX", "CON", "INT", "WIS", "CHA"].map(e => { return { name: e }; }),
+	saves:   [
+		{ name: "Fortitutde",	stat: "CON" },
+		{ name: "Reflex",		stat: "DEX" },
+		{ name: "Will",			stat: "WIS" },
+	],
+	skills: [
+		{ name: "Acrobatics", 		untrained: true,  acp: true,  stat: "DEX" },
+		{ name: "Athletics", 		untrained: true,  acp: true,  stat: "STR" },
+		{ name: "Bluff", 			untrained: true,  acp: false, stat: "CHA" },
+		{ name: "Computers", 		untrained: false, acp: false, stat: "INT" },
+		{ name: "Culture", 			untrained: false, acp: false, stat: "INT" },
+		{ name: "Diplomacy", 		untrained: true,  acp: false, stat: "CHA" },
+		{ name: "Disguise", 		untrained: true,  acp: false, stat: "CHA" },
+		{ name: "Engineering", 		untrained: false, acp: false, stat: "INT" },
+		{ name: "Intimidate", 		untrained: true,  acp: false, stat: "CHA" },
+		{ name: "Life Science", 	untrained: false, acp: false, stat: "INT" },
+		{ name: "Medicine", 		untrained: false, acp: false, stat: "INT" },
+		{ name: "Mysticism", 		untrained: false, acp: false, stat: "WIS" },
+		{ name: "Perception", 		untrained: true,  acp: false, stat: "WIS" },
+		{ name: "Physical Science", untrained: false, acp: false, stat: "INT" },
+		{ name: "Piloting", 		untrained: true,  acp: false, stat: "DEX" },
+		{ name: "Sense Motive", 	untrained: true,  acp: false, stat: "WIS" },
+		{ name: "Sleight of Hand", 	untrained: false, acp: true,  stat: "DEX" },
+		{ name: "Stealth", 			untrained: true,  acp: true,  stat: "DEX" },
+		{ name: "Survival", 		untrained: true,  acp: false, stat: "WIS" }
+	]
+};
+const dom = {
+	get: function(id) {
+		return document.getElementById(id);
+	},
+	create: function(type, args, parent, listeners) {
+		var element = document.createElement(type);
+		if (args) for (const [key, value] of Object.entries(args)) element[key] = value;
+		var parentNode = typeof parent == "string" ? this.get(parent) : parent._dom || parent;
+		if (parentNode) parentNode.appendChild(element);
+		if (listeners) Object.keys(listeners).forEach(e => element.addEventListener(e, listeners[e]));
+		return element;
+	},
+  select: function(parent, options, value, hideable) {
+		if (hideable && value) {
+			return dom.create("input", { type: "hidden", value: value }, parent);
+		} else {
+			var select = this.create("select", null, parent);
+			options.forEach(e => dom.create("option", { value: e.name || e, innerHTML: e.label || e.name || e}, select));
+			if (value) {
+				dom.create("option", { value: value, innerHTML: value }, select);
+				select.value = value;
+				select.disabled = true;
+			}
+			return select;
+		}
+	},
+  field: function(parent, name, value) {
+		var box = dom.create("div", {className: "box", id: name.toLowerCase()}, parent);
+		dom.create("span", {className: "label", innerHTML: name}, box);
+		dom.create("span", {className: "value", innerHTML: value}, box);
+	},
+	category: function(parent, id, name) {
+		var title = name || id;
+		var div = dom.create("div", {id: id, className: "category"}, parent);
+		dom.create("span", {className: "header", innerHTML: title}, div);
+		return div;
+	}
+};
+const bonus = {
+	_reg: new Set(),
+	_global: Object.entries(elements).flatMap(kv => kv[1].map(e => { return { name: e.name, label: "["+kv[0]+"] "+e.name}; })),
+	type: ["untyped", "insight", "morale", "circumstance", "divine", "enhancement", "luck"],
+  entry: function(parent, id, target, type, removable, value) {
+		return this._widget(id, dom.create("div", {className: "entry"}, parent), {
+			removable: removable,
+			get: function() {
+				return Object.keys(this.fields).reduce(((acc, curr) => {
+					acc[curr] = this.fields[curr].value;
+					return acc;
+				}), {id: this.id});
+			},
+      set: function(bonus) {
+				Object.keys(this.fields).forEach(f => { if(!this.fields[f].disabled) this.fields[f].value = bonus[f] });
+			},
+			build: function() {
+				this.fields = {
+					type: dom.select(this, bonus.type, type, true),
+					target: target ? dom.select(this, elements[target.split(":")[0]], target.split(":")[1]) : dom.select(this, bonus._global),
+					bonus: value ? (Array.isArray(value) ? dom.select(this, value) : dom.select(this, [], value, true)) : dom.create("input", { type: "text" }, this)
+				};
+				if (removable) dom.create("span", {className: "remove"}, this, { click: this.removeElement.bind(this) });
+			}
+    });
+  },
+  grid: function(parent, id, name, target, type, fixed) {
+		return this._widget(id, dom.create("div", {className: "grid"}, parent), {
+			target: target,
+			type: type,
+			fixed: fixed,
+			title: name || target,
+			add: function() {
+				return bonus.entry(this.grid, this.id, this.target, this.type, true, this.fixed);
+			},
+      set: function(bonus) {
+				this.add().set(bonus);
+			},
+			build: function() {
+				dom.create("span", {className: "header", innerHTML: this.title}, this);
+				this.grid = dom.create("div", null, this);
+				dom.create("span", {className: "add", innerHTML: "add " + this.title}, this, { click: this.add.bind(this) });
+			}
+		});
+	},
+  _widget: function(id, container, args) {
+		var widget = Object.assign({
+			id: id.toLowerCase(),
+			_dom: container,
+			removeElement: function() {
+				bonus._reg.delete(this);
+				this._dom.parentNode.removeChild(this._dom);
+			},
+			get: function() {},
+			set: function() {},
+			clear: function() {}
+		}, args);
+		if (args.build) args.build.apply(widget);
+		this._reg.add(widget);
+		return widget;
+	},
+  edit: function(bonuses) {
+		this.bonuses = bonuses || [];
+		this._reg = new Set();
+		var edit = dom.get("edit");
+		while (edit.firstChild) edit.removeChild(edit.firstChild);
+		["base", "race", "theme", "class", "ranks", "weapon", "armor"].forEach(c => dom.category(edit, c));
+		bonus.entry("base", "base_level", "internal:Level", "base");
+		elements.stats.forEach(s => bonus.entry("base", "base_"+s.name, "stats:"+s.name, "base"));
+		bonus.entry("race", "race_hp", "general:HP", "racial");
+		bonus.grid("race", "race_stats", null, "stats", "racial");
+		bonus.grid("race", "race_other", "other bonuses", null, "racial");
+		bonus.entry("theme", "theme_stat", "stats", "theme", false, true);
+		bonus.entry("theme", "theme_skill", "skills", "theme", false, true);
+    var saves = dom.category("class", "class_saves", "saves");
+		["HP","SP"].forEach(t => bonus.entry("class", "class_base_"+t, "general:"+t, "class"));
+		bonus.entry("class", "class_base_rp", "general:RP", "class", false, elements.stats.map(s => s.name));
+		bonus.entry("class", "class_base_bab", "internal:BAB", "class", false, ["full", "partial"]);
+		elements.saves.forEach(s => bonus.entry(saves, "class_save_"+s.name, "saves:"+s.name, "class", false, ["good", "bad"]));
+		bonus.grid("class", "class_skills", "class skills", "skills", "class", true);
+		bonus.grid("class", "class_other", "other bonuses");
+		elements.skills.forEach(s => bonus.entry("ranks", "ranks_"+s.name, "skills:"+s.name, "rank"));
+    ["KAC", "EAC"].forEach(t => bonus.entry("armor", "armor_"+t, "general:"+t, "armor"));
+		["ACP", "Max Dex"].forEach(t => bonus.entry("armor", "armor_"+t, "internal:"+t, "armor"));
+		bonus.grid("edit", "feats", "feat bonus");
+		bonus.grid("edit", "other", "other bonus");
+		this._reg.forEach(widget => {
+			this.bonuses.forEach(bonus => { 
+				if (bonus.id && !widget.removable && bonus.id.startsWith(widget.id)) widget.set(bonus);
+			});
+		});
+  },
+  show: function(bonuses) {
+		this.bonuses = bonuses || [];
+		var display = dom.get("display");
+		while (display.firstChild) display.removeChild(display.firstChild);
+		base.level = bonus.calculate("Level");
+		elements.stats.map(s => s.name).forEach(s => base[s] = formula.statBonus(s));
+		base.full = base.level;
+		base.partial = (base.level*3/4);
+		base.good = (base.level/2)+2;
+		base.bad = base.level/3;
+		Object.keys(elements).filter(c => c != "internal").forEach(category => {
+			var cat = dom.category(display, category);
+			var container = dom.create("div", {className: "displayContainer"}, cat);
+			elements[category]
+				.map(c => c.name)
+				.filter(n => n != "internal")
+				.forEach(n => dom.field(container, n, this.calculate(n)));
+		});
+	},
+  list: function() {
+		this.bonuses = Array.from(this._reg).map(e => e.get());
+		return this.bonuses;
+	},
+  get: function(target, filter) {
+		var map = this.bonuses
+			.filter(b => b.target == target)
+			.filter((typeof filter == "string") ? (b => b.type == filter) : filter || (b => true ))
+			.reduce((map, curr) => {
+				if (curr.type != "untyped" && bonus.type.includes(curr.type)) {
+					if (!map[curr.type] || (bonus.evaluate(curr) > bonus.evaluate(map[curr.type]))) map[curr.type] = curr;
+				} else map.all.push(curr);
+				return map;
+			}, {all: []});
+		bonus.type.forEach(b => map[b] ? map.all.push(map[b]) : true);
+		return map.all;
+	},
+  calculate: function(target) {
+		if (formula[target]) return formula[target]();
+		var category = Object.keys(elements).find(category => elements[category].some(e => e.name == target));
+		if (category && formula[category]) return formula[category](target);
+		if (target == "Level") {
+			var level = this.get(target)[0];
+			return level ? parseInt(level.bonus) : 1;
+		}
+		return this.sum(target);
+	},
+  sum: function(target) {
+		var list = (typeof target == "string") ? bonus.get(target) : target;
+		return list.map(this.evaluate).reduce((acc, curr) => acc + curr, 0);
+	},
+	evaluate: function(target) {
+		try {
+			if (!target.bonus) return 0;
+			with(base) {
+				return parseInt(eval(target.bonus));
+			}
+		} catch (e) {
+			return 0;
+		}
+	}
+};
+const formula = {
+  stats: stat => Math.min(18, bonus.sum(bonus.get(stat, s=>["base","theme","racial"].includes(s.type)))) + bonus.sum(bonus.get(stat, s=>!["base","theme","racial"].includes(s.type))),
+	skills: function(target) {
+		var skill = elements.skills.find(s => s.name == target);
+		var all = bonus.get(target);
+		var ranks = Math.min(base.level, bonus.sum(all.filter(b => b.type == "rank")));
+		var classSkill = all.some(b => b.type == "class");
+		var theme = all.some(b => b.type == "theme");
+		var csb = 0;
+		if (ranks) {
+			if (classSkill && theme) csb = 4;
+			else if (classSkill || theme) csb = 3;
+		}
+		var other = bonus.sum(all.filter(b => !["class","theme","rank"].includes(b.type)));
+		var stat = base[skill.stat];
+		var acp  = skill.acp ? bonus.calculate("ACP") : 0;
+		return stat + csb + ranks + acp + other;
+	},
+  statBonus: stat => Math.floor((bonus.calculate(stat)-10)/2),
+	saves: save => bonus.sum(save) + base[elements.saves.find(s => s.name == save).stat],
+	"Speed": ()=> bonus.get("Speed").map(s => s.bonus).join(", "),
+	"HP": ()=> bonus.sum("HP") + (bonus.sum(bonus.get("HP", "class")) * (base.level - 1)),
+  "SP": ()=> bonus.sum("SP") + base.CON + ((bonus.sum(bonus.get("SP", "class")) + base.CON) * (base.level - 1)),
+	"Max Dex": () => bonus.get("Max Dex").length ? bonus.get("Max Dex").map(bonus.evaluate).reduce(Math.min) : base.DEX,
+	"AC": ()=> 10 + Math.min(base.DEX, bonus.calculate("Max Dex")) + bonus.sum("AC"),
+	"KAC": ()=> formula.AC() + bonus.sum("KAC"),
+	"EAC": ()=> formula.AC() + bonus.sum("EAC"),
+	"Initiative": ()=> bonus.sum("Initiative") + base.DEX,
+};
+const site = {
+	init: function() {
+		["header", "edit", "display"].forEach(id => dom.create("div", {id: id}, document.body));
+		this.button = dom.create("span", { className: "button" }, "header", { click: this.toggle.bind(this) });
+		this.showDisplay(true);
+	},
+  load: function() {
+		var storage = localStorage.getItem("bonuses");
+		return storage ? JSON.parse(storage).filter(e => e) : [];
+	},
+	save: function() {
+		localStorage.setItem("bonuses", JSON.stringify(bonus.list()));
+	},
+  showDisplay: function(initial) {
+		dom.get("display").style.display = "initial";
+		dom.get("edit").style.display = "none";
+		this.button.innerHTML = "edit";
+		if (!initial) this.save();
+		bonus.show(this.load());
+	},
+	showEdit: function() {
+		dom.get("edit").style.display = "initial";
+		dom.get("display").style.display = "none";
+		this.button.innerHTML = "save";
+		bonus.edit(this.load());
+	},
+  toggle: function() {
+		this._t = typeof this._t == "undefined" ? 0 : this._t+1;
+		if (this._t%2 == 0) this.showEdit();
+		else this.showDisplay();
+	}
+};
+var base = {};
+site.init();
+		</script>
+	</body>
+</html>
