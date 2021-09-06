@@ -127,6 +127,7 @@ const elements = {
 		{ name: "Reflex",	stat: "DEX" },
 		{ name: "Will",		stat: "WIS" },
 	],
+	attack: ["To Hit", "Damage"].map(e => { return { name: e }; }),
 	skills: [
 		{ name: "Acrobatics", 		untrained: true,  acp: true,  stat: "DEX" },
 		{ name: "Athletics", 		untrained: true,  acp: true,  stat: "STR" },
@@ -271,6 +272,8 @@ const bonus = {
 		elements.skills.forEach(s => bonus.entry("ranks", "ranks_"+s.name, "skills:"+s.name, "rank"));
     		["KAC", "EAC"].forEach(t => bonus.entry("armor", "armor_"+t, "general:"+t, "armor"));
 		["ACP", "Max Dex"].forEach(t => bonus.entry("armor", "armor_"+t, "internal:"+t, "armor"));
+		bonus.entry("weapon", "weapon_type", "general:Weapon Type", "weapon", false, ["ranged", "melee"]);
+		bonus.entry("weapon", "weapon_damage", "attack:Damage", "weapon");
 		bonus.grid("edit", "feats", "feat bonus");
 		bonus.grid("edit", "other", "other bonus");
 		this._reg.forEach(widget => {
@@ -289,6 +292,8 @@ const bonus = {
 		base.partial = (base.level*3/4);
 		base.good = (base.level/2)+2;
 		base.bad = base.level/3;
+		var attackType = bonus.get("Weapon Type");
+		base.attackType = attackType && attackType[0] ? attackType[0].bonus : "ranged";
 		Object.keys(elements).filter(c => c != "internal").forEach(category => {
 			var cat = dom.category(display, category);
 			var container = dom.create("div", {className: "displayContainer"}, cat);
@@ -369,6 +374,18 @@ const formula = {
 	"KAC": ()=> formula.AC() + bonus.sum("KAC"),
 	"EAC": ()=> formula.AC() + bonus.sum("EAC"),
 	"Initiative": ()=> bonus.sum("Initiative") + base.DEX,
+	"To Hit": ()=> bonus.sum("To Hit") + bonus.sum("BAB") + base[base.attackType == "ranged" ? "DEX" : "STR"],
+	"Damage": function(target) {
+		var type = bonus.get("");
+		var result = bonus.get("Damage").reduce((acc,curr)=>{
+			var value = bonus.evaluate(curr);
+			if (value) acc.bonus += value;
+			else acc.base += acc.base.length ? "+" + curr.bonus : curr.bonus;
+			return acc;
+		}, { base: "", bonus: 0});
+		if (base.attackType != "ranged") result.bonus += base.STR;
+		return result.base + (result.bonus ? "+" + result.bonus : "");
+	}
 };
 const site = {
 	init: function() {
