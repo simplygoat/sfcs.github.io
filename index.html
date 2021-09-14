@@ -60,6 +60,9 @@ body, input, select {
 	margin: 0.2em;
 	flex-basis: 100%;
 }
+.box#speed .value{
+	margin-left: 0.5em;
+}
 #skills .displayContainer {
 	columns: 10em 2;
 }
@@ -370,7 +373,19 @@ const formula = {
 	},
 	 statBonus: stat => Math.floor((bonus.calculate(stat)-10)/2),
 	saves: save => "+" + (bonus.sum(save) + base[elements.saves.find(s => s.name == save).stat]),
-	"Speed": ()=> bonus.get("Speed").map(s => s.bonus).join(", "),
+	"Speed": ()=> {
+		var regex = /[0-9]{1,2}/;
+		var speeds = bonus.get("Speed", b => b.type == "racial");
+		return speeds.map(s => s.bonus).map(s => {
+			var match = regex.exec(s);
+			if (match && match[0]) {
+				var numberValue = match[0];
+				var boni = bonus.get("Speed", b => b.type != "racial");
+				boni.push({bonus: numberValue});
+				return s.replace(numberValue, bonus.sum(boni));
+			} else return s;
+		}).join(", ");
+	},
 	"HP": ()=> bonus.sum("HP") + (bonus.sum(bonus.get("HP", "class")) * (base.level - 1)),
   	"SP": ()=> bonus.sum("SP") + base.CON + ((bonus.sum(bonus.get("SP", "class")) + base.CON) * (base.level - 1)),
 	"Max Dex": () => bonus.get("Max Dex").length ? bonus.get("Max Dex").map(bonus.evaluate).reduce(Math.min) : base.DEX,
