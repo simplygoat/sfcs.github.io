@@ -122,7 +122,7 @@ select:disabled {
 		<script>
 const elements = {
 	general: ["KAC", "EAC", "HP", "SP", "RP", "Initiative", "Speed"].map(e => { return { name: e }; }),
-	internal:["Level", "AC", "ACP", "Max Dex", "BAB"].map(e => { return { name: e }; }),
+	internal:["Level", "All Skills", "AC", "ACP", "Max Dex", "BAB"].map(e => { return { name: e }; }),
 	stats:   ["STR", "DEX", "CON", "INT", "WIS", "CHA"].map(e => { return { name: e }; }),
 	saves:   [
 		{ name: "Fortitutde",	stat: "CON" },
@@ -311,7 +311,7 @@ const bonus = {
 	},
   	get: function(target, filter) {
 		var map = this.bonuses
-			.filter(b => b.target == target)
+			.filter(b => !target || b.target == target)
 			.filter((typeof filter == "string") ? (b => b.type == filter) : filter || (b => true ))
 			.reduce((map, curr) => {
 				if (curr.type != "untyped" && bonus.type.includes(curr.type)) {
@@ -352,7 +352,7 @@ const formula = {
   stats: stat => Math.min(18, bonus.sum(bonus.get(stat, s=>["base","theme","racial"].includes(s.type)))) + bonus.sum(bonus.get(stat, s=>!["base","theme","racial"].includes(s.type))),
 	skills: function(target) {
 		var skill = elements.skills.find(s => s.name == target);
-		var all = bonus.get(target);
+		var all = bonus.get(null, b => b.target == target || b.target == "All Skills");
 		var ranks = Math.min(base.level, bonus.sum(all.filter(b => b.type == "rank")));
 		var classSkill = all.some(b => b.type == "class");
 		var theme = all.some(b => b.type == "theme");
@@ -365,7 +365,8 @@ const formula = {
 		var stat = base[skill.stat];
 		var acp  = skill.acp ? bonus.calculate("ACP") : 0;
 		var val = stat + csb + ranks + acp + other;
-		return val >= 0 ? "+" + val : val;
+		var res = val >= 0 ? "+" + val : val;
+		return !ranks && !skill.untrained ? "("+res+")" : res;
 	},
 	 statBonus: stat => Math.floor((bonus.calculate(stat)-10)/2),
 	saves: save => "+" + (bonus.sum(save) + base[elements.saves.find(s => s.name == save).stat]),
