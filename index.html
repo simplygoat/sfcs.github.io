@@ -154,8 +154,46 @@ const elements = {
 		{ name: "Sleight of Hand", 	untrained: false, acp: true,  stat: "DEX" },
 		{ name: "Stealth", 		untrained: true,  acp: true,  stat: "DEX" },
 		{ name: "Survival", 		untrained: true,  acp: false, stat: "WIS" }
-	]
+	],
+	conditions: []
 };
+const conditions = {
+	"Asleep": 	[["Perception","-10"]],
+	"Blinded": 	[["AC","-2","flat-footed"],["Skills:STR","-4"],["Skills:DEX","-4"]],
+	"Cowering":	[["AC","-2","flat-footed"]],
+	"Dazzled":	[["Perception","-1"],["To Hit","-1"]],
+	"Deafened": 	[["Perception","-4"],["Initiative","-4"]],
+	"Encumbered":	[["Max Dex","2"],["Speed","-10"],["Skills:STR","-5"],["Skills:DEX","-5"]],
+	"Entangled":	[["MULTI:Speed","0.5"],["AC","-2"],["To Hit","-2"],["Reflex","-2"],["Initiative","-2"],["Skills:DEX","-2"]],
+	"Exhausted":	[["MULTI:Speed","0.5"],["AC","-3"],["To Hit","-3"],["Damage:melee","-3"],["Reflex","-3"],["Initiative","-3"],["Skills:DEX","-3"],["Skills:STR","-3"]],
+	"Fascinated":	[["All Skills","-4"]],
+	"Fatigued":	[["AC","-1"],["To Hit","-1"],["Damage:melee","-1"],["Reflex","-1"],["Initiative","-1"],["Skills:DEX","-1"],["Skills:STR","-1"]],
+	"Flat-footed":	[["AC","-2","flat-footed"]],
+	"Frightened":	[["All Skills","-2"],["To Hit","-2"],["All Saves","-2"]],
+	"Grappled":	[["MULTI:Speed","0"],["AC","-2"],["To Hit","-2"],["Reflex","-2"],["Initiative","-2"],["Skills:DEX","-2"]],
+	"Helpless":	[["MOD:DEX","-5"]],
+	"Off-kilter":	[["To Hit","-2"],["AC","-2","flat-footed"]],
+	"Off-target":	[["To Hit","-2"]],
+	"Overburdened":	[["MAX:Speed","5"],["Max Dex","0"],["Skills:DEX","-5"],["Skills:STR","-5"]],
+	"Panicked":	[["All Skills","-2"],["To Hit","-2"],["All Saves","-2"]],
+	"Paralyzed":	[["MOD:DEX","-5"]],
+	"Pinned":	[["MULTI:Speed","0"],["AC","-2","flat-footed"],["To Hit","-4"],["Reflex","-4"],["Initiative","-4"],["Skills:DEX","-4"]],
+	"Prone":	[["To Hit:melee","-4"]],
+	"Shaken":	[["All Skills","-2"],["To Hit","-2"],["All Saves","-2"]],
+	"Sickened":	[["All Skills","-2"],["To Hit","-2"],["All Saves","-2"],["Damage","-2"]],
+	"Stunned":	[["AC","-2","flat-footed"]]
+};
+Object.keys(conditions).forEach(c => {
+	elements.conditions.push({
+		name: c,
+		effect: conditions[c].map(a => { return {
+			target: a[0],
+			bonus: a[1],
+			type: a[2]
+		}})
+	});
+	
+});
 const dom = {
 	get: function(id) {
 		return document.getElementById(id);
@@ -283,6 +321,7 @@ const bonus = {
 		bonus.entry("weapon", "weapon_damage_type", "internal:Damage Type", "weapon");
 		bonus.grid("edit", "feats", "feat bonus");
 		bonus.grid("edit", "other", "other bonus");
+		bonus.grid("edit", "conditions", "condition", "conditions", "condition", 1);
 		this._reg.forEach(widget => {
 			this.bonuses.forEach(bonus => { 
 				if (bonus.id && !widget.removable && bonus.id == widget.id) widget.set(bonus);
@@ -291,6 +330,7 @@ const bonus = {
   	},
   	show: function(bonuses) {
 		this.bonuses = bonuses || [];
+		this.bonuses = this.bonuses.concat(bonus.get(null, "condition").flatMap(b => elements.conditions.find(s => s.name == b.target).effect));
 		var display = dom.get("display");
 		while (display.firstChild) display.removeChild(display.firstChild);
 		base.level = bonus.calculate("Level");
@@ -301,12 +341,11 @@ const bonus = {
 		base.bad = base.level/3;
 		var attackType = bonus.get("Weapon Type");
 		base.attackType = attackType && attackType[0] ? attackType[0].bonus : "ranged";
-		Object.keys(elements).filter(c => c != "internal").forEach(category => {
+		Object.keys(elements).filter(c => c != "internal" && c != "conditions").forEach(category => {
 			var cat = dom.category(display, category);
 			var container = dom.create("div", {className: "displayContainer"}, cat);
 			elements[category]
 				.map(c => c.name)
-				.filter(n => n != "internal")
 				.forEach(n => dom.field(container, n, this.calculate(n)));
 		});
 	},
@@ -355,7 +394,8 @@ const bonus = {
 	}
 };
 const formula = {
-  stats: stat => Math.min(18, bonus.sum(bonus.get(stat, s=>["base","theme","racial"].includes(s.type)))) + bonus.sum(bonus.get(stat, s=>!["base","theme","racial"].includes(s.type))),
+	_plus: num => typeof num != "undefined" ? (num>0 ? "+"+num : ""+num) : "",
+	stats: stat => Math.min(18, bonus.sum(bonus.get(stat, s=>["base","theme","racial"].includes(s.type)))) + bonus.sum(bonus.get(stat, s=>!["base","theme","racial"].includes(s.type))),
 	skills: function(target) {
 		var skill = elements.skills.find(s => s.name == target);
 		var all = bonus.get(null, b => b.target == target || b.target == "All Skills");
@@ -367,25 +407,33 @@ const formula = {
 			if (classSkill && theme) csb = 4;
 			else if (classSkill || theme) csb = 3;
 		}
-		var other = bonus.sum(all.filter(b => !["class","theme","rank"].includes(b.type)));
+		var other = bonus.sum(all.filter(b => !["class","theme","rank"].includes(b.type))) + bonus.sum("Skills:"+skill.stat);
 		var stat = base[skill.stat];
 		var acp  = skill.acp ? bonus.calculate("ACP") : 0;
 		var val = stat + csb + ranks + acp + other;
-		var res = val >= 0 ? "+" + val : val;
+		var res = formula._plus(val);
 		return !ranks && !skill.untrained ? "("+res+")" : res;
 	},
-	statBonus: stat => Math.floor((bonus.calculate(stat)-10)/2),
-	saves: save => "+" + (bonus.sum(save) + base[elements.saves.find(s => s.name == save).stat]),
+	statBonus: stat => {
+		var fixed = bonus.get("MOD:"+stat);
+		if (fixed && fixed.length) return fixed.map(bonus.evaluate).reduce(Math.min);
+		return Math.floor((bonus.calculate(stat)-10)/2)
+	},
+	saves: save => formula._plus(bonus.sum("All Saves") + bonus.sum(save) + base[elements.saves.find(s => s.name == save).stat]),
 	"Speed": ()=> {
 		var regex = /[0-9]{1,2}/;
 		var speeds = bonus.get("Speed", b => b.type == "racial");
+		var mod = bonus.get("MULTI:Speed").reduce((acc, curr) => acc * bonus.evaluate(curr), 1);
+		var max = bonus.get("MAX:Speed").map(bonus.evaluate).reduce(Math.min);
 		return speeds.map(s => s.bonus).map(s => {
 			var match = regex.exec(s);
 			if (match && match[0]) {
 				var numberValue = match[0];
 				var boni = bonus.get("Speed", b => b.type != "racial");
 				boni.push({bonus: numberValue});
-				return s.replace(numberValue, bonus.sum(boni));
+				var speed = bonus.sum(boni) * mod;
+				if (max) speed = Math.min(max, speed);
+				return s.replace(numberValue, speed);
 			} else return s;
 		}).join(", ");
 	},
@@ -395,8 +443,8 @@ const formula = {
 	"AC": ()=> 10 + Math.min(base.DEX, bonus.calculate("Max Dex")) + bonus.sum("AC"),
 	"KAC": ()=> formula.AC() + bonus.sum("KAC"),
 	"EAC": ()=> formula.AC() + bonus.sum("EAC"),
-	"Initiative": ()=> "+" + (bonus.sum("Initiative") + base.DEX),
-	"To Hit": ()=> "+" + (bonus.sum("To Hit") + bonus.sum("BAB") + base[base.attackType == "ranged" ? "DEX" : "STR"]),
+	"Initiative": ()=> formula._plus(bonus.sum("Initiative") + base.DEX),
+	"To Hit": ()=> formula._plus(bonus.sum("To Hit") + bonus.sum("BAB") + base[base.attackType == "ranged" ? "DEX" : "STR"]),
 	"Damage": function(target) {
 		var type = bonus.get("Damage Type");
 		type = type && type[0] ? type[0].bonus : "?";
@@ -407,7 +455,8 @@ const formula = {
 			return acc;
 		}, { base: "", bonus: 0});
 		if (base.attackType != "ranged") result.bonus += base.STR;
-		return result.base + (result.bonus ? "+" + result.bonus : "") + " " + type;
+		result.bonus += bonus.sum("Damage:"+base.attackType);
+		return result.base + formula._plus(result.bonus) + " " + type;
 	}
 };
 const site = {
