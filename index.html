@@ -94,6 +94,13 @@ body, input, select {
 	width: 2em;
 	text-align: end;
 }
+#notes {
+	white-space: pre;
+}
+#notes span:not(.header) {
+	margin: 0.2em;
+	display: block;
+}
 #conditions .box {
 	display: block !important;
 	border: 0px !important;
@@ -122,6 +129,12 @@ input, select {
 	border-radius: 0;
 	border-bottom: 1px solid black;
 	padding: 0em 0.2em 0em 0em;
+}
+textarea {
+	max-width: 30em;
+	width: 100%;
+	min-height: 7em;
+	font-size: 1em;
 }
 select:disabled {
 	min-width: 10em;
@@ -367,6 +380,18 @@ const bonus = {
 		bonus.entry("weapon", "weapon_damage_type", "internal:Damage Type", "weapon");
 		bonus.grid("edit", "feats", "feat bonus");
 		bonus.grid("edit", "other", "other bonus");
+		bonus._widget("notes", dom.category("edit", "note", "notes"), {
+			set: function(bonus) { 
+				this.note.value = bonus.bonus;
+				this.note.style.height = this.note.scrollHeight + "px";
+			},
+			get: function() {
+				return { id: "notes", target: "notes", bonus: this.note.value };
+			},
+			build: function() {
+				this.note = dom.create("textarea", null, this);
+			}
+		});
 		this._reg.forEach(widget => {
 			this.bonuses.forEach(bonus => { 
 				if (bonus.id && !widget.removable && bonus.id == widget.id) widget.set(bonus);
@@ -412,6 +437,7 @@ const bonus = {
 				.map(c => c.name)
 				.forEach(n => dom.field(container, n, this.calculate(n)));
 		});
+		dom.create("span", {innerHTML: bonus.get("notes").map(b => b.bonus).join()}, dom.category(display, "notes"));
 	},
  	list: function() {
 		this.bonuses = Array.from(this._reg).map(e => e.get());
