@@ -489,7 +489,7 @@ const formula = {
 		if (fixed && fixed.length) return fixed.map(bonus.evaluate).reduce((acc, curr) => Math.min(acc, curr));
 		var damage = bonus.sum(bonus.get(stat, s => s.type == "damage"));
 		damage = -Math.abs(parseInt(damage/2));
-		return Math.floor((bonus.calculate(stat)-10)/2)
+		return Math.floor((bonus.calculate(stat)-10)/2) + damage;
 	},
 	saves: save => formula._plus(bonus.sum("All Saves") + bonus.sum(save) + base[elements.saves.find(s => s.name == save).stat]),
 	"Speed": ()=> {
