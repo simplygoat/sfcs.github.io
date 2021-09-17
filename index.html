@@ -400,7 +400,7 @@ const bonus = {
 			var box = dom.field(container, "curr_"+r, "0", "Current "+r);
 			var sub = dom.create("div", {className: "subContainer"}, box);
 			dom.create("span", {className: "add"}, sub, { click: ()=>site.applyResourceChange(r, true) });
-			dom.create("input", { id: "delta_"+r, type: "text" }, sub)
+			dom.create("input", { id: "delta_"+r, type: "number" }, sub)
 			dom.create("span", {className: "subtract"}, sub, { click: ()=>site.applyResourceChange(r, false) });
 		});
 		site.updateResources();
@@ -569,6 +569,8 @@ const site = {
 		return entry.value;
 	},
 	setResource: function(resource, value) {
+		if (typeof value != "number" || isNaN(value)) return;
+		if (value < 0) value = 0;
 		var store = site.load("resource");
 		var entry = store.find(r => r.name == resource);
 		if (typeof entry == "undefined") store.push({ name: resource, value: value });
@@ -579,19 +581,18 @@ const site = {
 		var element = dom.get("delta_"+resource);
 		try {
 			var change = Math.abs(parseInt(element.value || "1"));
+			if (isNaN(change)) throw "not a number";
 			if (!add) change = -change;
 			site._applyResourceChange(resource, change);
 			site.updateResources();
 		} catch (e) {
-			element.value = "invalid";
+			element.value = e || "invalid";
 		}
 	},
 	_applyResourceChange: function(resource, value) {
 		var newVal = Math.min(bonus.calculate(resource), site.getResource(resource) + value);
-		if (resource == "SP" && newVal < 0) {
-			site.setResource("SP", 0);
-			site._applyResourceChange("HP", newVal);
-		} else site.setResource(resource, newVal);
+		if (resource == "SP" && newVal < 0) site._applyResourceChange("HP", newVal);
+		site.setResource(resource, newVal);
 	},
 	updateResources: function() {
 		["HP","SP","RP"].forEach(s => dom.get("curr_"+s.toLowerCase()).children[1].innerHTML = site.getResource(s));
