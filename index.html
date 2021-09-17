@@ -80,6 +80,9 @@ body, input, select {
 	width: 2em;
 	text-align: end;
 }
+#conditions .box {
+	border: 0px;
+}
 .entry {
 	margin: 0.2em 0em 0.2em 0.5em;
 }
@@ -330,7 +333,8 @@ const bonus = {
   	},
   	show: function(bonuses) {
 		this.bonuses = bonuses || [];
-		this.bonuses = this.bonuses.concat(bonus.get(null, "condition").flatMap(b => elements.conditions.find(s => s.name == b.target).effect));
+		var conditions = bonus.get(null, "condition");
+		this.bonuses = this.bonuses.concat(conditions.flatMap(b => elements.conditions.find(s => s.name == b.target).effect));
 		var display = dom.get("display");
 		while (display.firstChild) display.removeChild(display.firstChild);
 		base.level = bonus.calculate("Level");
@@ -341,6 +345,10 @@ const bonus = {
 		base.bad = base.level/3;
 		var attackType = bonus.get("Weapon Type");
 		base.attackType = attackType && attackType[0] ? attackType[0].bonus : "ranged";
+		if (conditions.length) {
+			var cat = dom.category(display, "conditions");
+			conditions.forEach(c => dom.create("span", { className: "box", innerHTML: c.target }, cat));
+		}
 		Object.keys(elements).filter(c => c != "internal" && c != "conditions").forEach(category => {
 			var cat = dom.category(display, category);
 			var container = dom.create("div", {className: "displayContainer"}, cat);
