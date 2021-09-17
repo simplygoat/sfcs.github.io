@@ -458,7 +458,7 @@ const formula = {
 		}, { base: "", bonus: 0});
 		if (base.attackType != "ranged") result.bonus += base.STR;
 		result.bonus += bonus.sum("Damage:"+base.attackType);
-		return result.base + formula._plus(result.bonus) + " " + type;
+		return result.base + (result.bonus != 0 ? formula._plus(result.bonus) : "") + " " + type;
 	}
 };
 const site = {
