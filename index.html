@@ -446,7 +446,7 @@ const formula = {
 	"KAC": ()=> formula.AC() + bonus.sum("KAC"),
 	"EAC": ()=> formula.AC() + bonus.sum("EAC"),
 	"Initiative": ()=> formula._plus(bonus.sum("Initiative") + base.DEX),
-	"To Hit": ()=> formula._plus(bonus.sum("To Hit") + bonus.sum("BAB") + base[base.attackType == "ranged" ? "DEX" : "STR"]),
+	"To Hit": ()=> formula._plus(bonus.sum("To Hit") + bonus.sum("To Hit:"+base.attackType) + bonus.sum("BAB") + base[base.attackType == "ranged" ? "DEX" : "STR"]),
 	"Damage": function(target) {
 		var type = bonus.get("Damage Type");
 		type = type && type[0] ? type[0].bonus : "?";
