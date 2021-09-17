@@ -359,7 +359,7 @@ const bonus = {
 			.filter(b => b.bonus && (b.bonus.length || b.bonus > 0))
 			.filter((typeof filter == "string") ? (b => b.type == filter) : filter || (b => true ))
 			.reduce((map, curr) => {
-				if (curr.type != "untyped" && bonus.type.includes(curr.type)) {
+				if (curr.type != "untyped" && (bonus.type.includes(curr.type) || curr.type == "flat-footed")) {
 					if (!map[curr.type] || (bonus.evaluate(curr) > bonus.evaluate(map[curr.type]))) map[curr.type] = curr;
 				} else map.all.push(curr);
 				return map;
