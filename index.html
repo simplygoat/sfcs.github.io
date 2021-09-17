@@ -423,7 +423,7 @@ const formula = {
 	"Speed": ()=> {
 		var regex = /[0-9]{1,2}/;
 		var speeds = bonus.get("Speed", b => b.type == "racial");
-		var mod = bonus.get("MULTI:Speed").reduce((acc, curr) => acc * bonus.evaluate(curr), 1);
+		var mod = bonus.get("MULTI:Speed").reduce((acc, curr) => acc * eval(curr.bonus), 1);
 		var max = 0;
 		var fixed = bonus.get("MAX:Speed");
 		if (fixed && fixed.length) max = bonus.get("MAX:Speed").map(bonus.evaluate).reduce((acc, curr) => Math.min(acc, curr));
@@ -435,7 +435,7 @@ const formula = {
 				boni.push({bonus: numberValue});
 				var speed = bonus.sum(boni) * mod;
 				if (max) speed = Math.min(max, speed);
-				return s.replace(numberValue, speed);
+				return s.replace(numberValue, parseInt(speed/5)*5);
 			} else return s;
 		}).join(", ");
 	},
