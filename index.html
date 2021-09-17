@@ -439,8 +439,12 @@ const bonus = {
 			dom.create("span", {className: "subtract"}, sub, { click: ()=>site.applyResourceChange(r, false) });
 		});
 		dom.create("span", {className: "button", innerHTML: "10m rest"}, cat, { click: function() {
-			site.setResource("SP", "max");
-			site.updateResources();
+			var rp = site.getResource("RP");
+			if (rp > 0) {
+				site.setResource("RP", rp-1);
+				site.setResource("SP", "max");
+				site.updateResources();
+			}
 		}});
 		dom.create("span", {className: "button", innerHTML: "long rest"}, cat, { click: function() {
 			site.setResource("SP", "max");
@@ -640,6 +644,7 @@ const site = {
 			if (!add) change = -change;
 			site._applyResourceChange(resource, change);
 			site.updateResources();
+			element.value = "";
 		} catch (e) {
 			element.value = e || "invalid";
 		}
