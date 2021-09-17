@@ -416,7 +416,7 @@ const formula = {
 	},
 	statBonus: stat => {
 		var fixed = bonus.get("MOD:"+stat);
-		if (fixed && fixed.length) return fixed.map(bonus.evaluate).reduce(Math.min);
+		if (fixed && fixed.length) return fixed.map(bonus.evaluate).reduce((acc, curr) => Math.min(acc, curr));
 		return Math.floor((bonus.calculate(stat)-10)/2)
 	},
 	saves: save => formula._plus(bonus.sum("All Saves") + bonus.sum(save) + base[elements.saves.find(s => s.name == save).stat]),
@@ -426,7 +426,7 @@ const formula = {
 		var mod = bonus.get("MULTI:Speed").reduce((acc, curr) => acc * bonus.evaluate(curr), 1);
 		var max = 0;
 		var fixed = bonus.get("MAX:Speed");
-		if (fixed && fixed.length) max = bonus.get("MAX:Speed").map(bonus.evaluate).reduce(Math.min);
+		if (fixed && fixed.length) max = bonus.get("MAX:Speed").map(bonus.evaluate).reduce((acc, curr) => Math.min(acc, curr));
 		return speeds.map(s => s.bonus).map(s => {
 			var match = regex.exec(s);
 			if (match && match[0]) {
@@ -441,7 +441,7 @@ const formula = {
 	},
 	"HP": ()=> bonus.sum("HP") + (bonus.sum(bonus.get("HP", "class")) * (base.level - 1)),
   	"SP": ()=> bonus.sum("SP") + base.CON + ((bonus.sum(bonus.get("SP", "class")) + base.CON) * (base.level - 1)),
-	"Max Dex": () => bonus.get("Max Dex").length ? bonus.get("Max Dex").map(bonus.evaluate).reduce(Math.min) : base.DEX,
+	"Max Dex": () => bonus.get("Max Dex").length ? bonus.get("Max Dex").map(bonus.evaluate).reduce((acc, curr) => Math.min(acc, curr)) : base.DEX,
 	"AC": ()=> 10 + Math.min(base.DEX, bonus.calculate("Max Dex")) + bonus.sum("AC"),
 	"KAC": ()=> formula.AC() + bonus.sum("KAC"),
 	"EAC": ()=> formula.AC() + bonus.sum("EAC"),
