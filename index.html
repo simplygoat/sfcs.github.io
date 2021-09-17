@@ -51,10 +51,24 @@ body, input, select {
 }
 .category:not(#skills) .box:not(#speed) > span {
 	display: block;
-    text-align: center;
+	text-align: center;
 }
 .category:not(#skills) .box:not(#speed) > .value {
 	font-size: 2em;
+}
+.subContainer {
+	text-align: center;
+	margin-bottom: 0.2em;
+}
+.subContainer > *{
+	display: inline !important;
+	max-width: 4em;
+}
+#general #hp .label::before,
+#general #sp .label::before,
+#general #rp .label::before {
+	content: "Max";
+	margin-right: 0.1em;
 }
 .box#speed {
 	margin: 0.2em;
@@ -116,22 +130,28 @@ select:disabled {
 	-webkit-appearance: none;
    	-moz-appearance: none;
 }
-.grid span.add::before {
+span.add::before {
 	content: "+";
 	color: white;
 	background-color: green;
+}
+span.subtract::before {
+	content: "-";
+	color: white;
+	background-color: red;
 }
 .entry .remove::before {
 	content: "X";
 	border: 1px solid black;
 }
-.grid span.add::before, .entry .remove::before {
+span.add::before, span.subtractspan.add::before, span.subtract::before, .entry .remove::before {
 	display: inline-block;
 	border-radius: 0.2em;
 	width: 1em;
 	height: 1em;
 	text-align: center;
 	margin: 0.3em 0.2em 0em 0.5em;
+	cursor: pointer;
 }
 		</style>
 	</head>
@@ -243,10 +263,11 @@ const dom = {
 			return select;
 		}
 	},
-  	field: function(parent, name, value) {
+  	field: function(parent, name, value, desc) {
 		var box = dom.create("div", {className: "box", id: name.toLowerCase()}, parent);
-		dom.create("span", {className: "label", innerHTML: name}, box);
+		dom.create("span", {className: "label", innerHTML: desc || name}, box);
 		dom.create("span", {className: "value", innerHTML: value}, box);
+		return box;
 	},
 	category: function(parent, id, name) {
 		var title = name || id;
@@ -373,6 +394,16 @@ const bonus = {
 				dom.create("span", { className: "value", innerHTML: c.description || "-"}, box);
 			});
 		}
+		var cat = dom.category(display, "resources");
+		var container = dom.create("div", {className: "displayContainer"}, cat);
+		["HP","SP","RP"].forEach(r => {
+			var box = dom.field(container, "curr_"+r, "0", "Current "+r);
+			var sub = dom.create("div", {className: "subContainer"}, box);
+			dom.create("span", {className: "add"}, sub, { click: ()=>site.applyResourceChange(r, true) });
+			dom.create("input", { id: "delta_"+r, type: "text" }, sub)
+			dom.create("span", {className: "subtract"}, sub, { click: ()=>site.applyResourceChange(r, false) });
+		});
+		site.updateResources();
 		Object.keys(elements).filter(c => c != "internal" && c != "conditions").forEach(category => {
 			var cat = dom.category(display, category);
 			var container = dom.create("div", {className: "displayContainer"}, cat);
@@ -500,30 +531,70 @@ const site = {
 		this.button = dom.create("span", { className: "button" }, "header", { click: this.toggle.bind(this) });
 		this.showDisplay(true);
 	},
-  	load: function() {
-		var storage = localStorage.getItem("bonuses");
-		return storage ? JSON.parse(storage).filter(e => e) : [];
+  	load: function(name) {
+		var storage = localStorage.getItem(name);
+		if (storage) storage = JSON.parse(storage);
+		else site.save(name, storage = []);
+		return storage.filter(e => e);
 	},
-	save: function() {
-		localStorage.setItem("bonuses", JSON.stringify(bonus.list()));
+	save: function(name, value) {
+		localStorage.setItem(name, JSON.stringify(value));
 	},
   	showDisplay: function(initial) {
 		dom.get("display").style.display = "initial";
 		dom.get("edit").style.display = "none";
 		this.button.innerHTML = "edit";
-		if (!initial) this.save();
-		bonus.show(this.load());
+		if (!initial) this.save("bonuses", bonus.list());
+		bonus.show(this.load("bonuses"));
 	},
 	showEdit: function() {
 		dom.get("edit").style.display = "initial";
 		dom.get("display").style.display = "none";
 		this.button.innerHTML = "save";
-		bonus.edit(this.load());
+		bonus.edit(this.load("bonuses"));
 	},
   	toggle: function() {
 		this._t = typeof this._t == "undefined" ? 0 : this._t+1;
 		if (this._t%2 == 0) this.showEdit();
 		else this.showDisplay();
+	},
+	getResource: function(resource) {
+		var store = site.load("resource");
+		var entry = store.find(r => r.name == resource);
+		if (typeof entry == "undefined") {
+			val = bonus.calculate(resource);
+			site.setResource(resource, val);
+			return val;
+		}
+		return entry.value;
+	},
+	setResource: function(resource, value) {
+		var store = site.load("resource");
+		var entry = store.find(r => r.name == resource);
+		if (typeof entry == "undefined") store.push({ name: resource, value: value });
+		else entry.value = value;
+		site.save("resource", store);
+	},
+	applyResourceChange: function(resource, add) {
+		var element = dom.get("delta_"+resource);
+		try {
+			var change = Math.abs(parseInt(element.value));
+			if (!add) change = -change;
+			site._applyResourceChange(resource, change);
+			site.updateResources();
+		} catch (e) {
+			element.value = "invalid";
+		}
+	},
+	_applyResourceChange: function(resource, value) {
+		var newVal = Math.min(bonus.calculate(resource), site.getResource(resource) + value);
+		if (resource == "SP" && newVal < 0) {
+			site.setResource("SP", 0);
+			site._applyResourceChange("HP", newVal);
+		} else site.setResource(resource, newVal);
+	},
+	updateResources: function() {
+		["HP","SP","RP"].forEach(s => dom.get("curr_"+s.toLowerCase()).children[1].innerHTML = site.getResource(s));
 	}
 };
 var base = {};
