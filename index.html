@@ -81,7 +81,17 @@ body, input, select {
 	text-align: end;
 }
 #conditions .box {
+	display: block !important;
 	border: 0px !important;
+}
+#conditions .box > span {
+	display: inline-block !important;
+}
+#conditions .box > .value {
+	font-size: 0.8em !important;
+}
+.box#speed .label::after, #conditions .label::after {
+	content: ":";
 }
 .entry {
 	margin: 0.2em 0em 0.2em 0.5em;
@@ -162,38 +172,48 @@ const elements = {
 };
 const conditions = {
 	"Asleep": 	[["Perception","-10"]],
-	"Blinded": 	[["AC","-2","flat-footed"],["Skills:STR","-4"],["Skills:DEX","-4"],["Perception","-4"],["MULTI:Speed","0.5"]],
-	"Cowering":	[["AC","-2","flat-footed"]],
+	"Bleeding:	["You take the listed damage at the beginning of your turn."],
+	"Blinded": 	[["AC","-2","flat-footed"],["Skills:STR","-4"],["Skills:DEX","-4"],["Perception","-4"],"You automatically fail Perception checks based on sight, opponents have total concealment against you, and you must succeed at a DC 10 Acrobatics check to move faster than half speed or else fall prone."],
+	"Burning:	["You take the listed fire damage each round, and you must be extinguished to end the condition."],
+	"Confused":	["You treat all creatures as enemies, and you must roll on the table to determine your actions."],
+	"Cowering":	[["AC","-2","flat-footed"], "You can take no actions."],
+	"Dazed":	["You can take no actions."],
 	"Dazzled":	[["Perception","-1"],["To Hit","-1"]],
-	"Deafened": 	[["Perception","-4"],["Initiative","-4"]],
+	"Deafened": 	[["Perception","-4"],["Initiative","-4"], "You automatically fail sound-based Perception checks."],
+	"Dying":	["You’re unconscious, you can take no actions, and you must stabilize or lose Resolve Points and potentially die.You’re unconscious, you can take no actions, and you must stabilize or lose Resolve Points and potentially die."],
 	"Encumbered":	[["Max Dex","2"],["Speed","-10"],["Skills:STR","-5"],["Skills:DEX","-5"]],
-	"Entangled":	[["MULTI:Speed","0.5"],["AC","-2"],["To Hit","-2"],["Reflex","-2"],["Initiative","-2"],["Skills:DEX","-2"]],
-	"Exhausted":	[["MULTI:Speed","0.5"],["AC","-3"],["To Hit","-3"],["Damage:melee","-3"],["Reflex","-3"],["Initiative","-3"],["Skills:DEX","-3"],["Skills:STR","-3"]],
+	"Entangled":	[["MULTI:Speed","0.5"],["AC","-2"],["To Hit","-2"],["Reflex","-2"],["Initiative","-2"],["Skills:DEX","-2"],"You cannot run or charge"],
+	"Exhausted":	[["MULTI:Speed","0.5"],["AC","-3"],["To Hit","-3"],["Damage:melee","-3"],["Reflex","-3"],["Initiative","-3"],["Skills:DEX","-3"],["Skills:STR","-3"],"You cannot run or charge and you reduce your encumbered limit by 3 bulk"],
 	"Fascinated":	[["All Skills","-4"]],
-	"Fatigued":	[["AC","-1"],["To Hit","-1"],["Damage:melee","-1"],["Reflex","-1"],["Initiative","-1"],["Skills:DEX","-1"],["Skills:STR","-1"]],
-	"Flat-footed":	[["AC","-2","flat-footed"]],
-	"Frightened":	[["All Skills","-2"],["To Hit","-2"],["All Saves","-2"]],
-	"Grappled":	[["MULTI:Speed","0"],["AC","-2"],["To Hit","-2"],["Reflex","-2"],["Initiative","-2"],["Skills:DEX","-2"]],
-	"Helpless":	[["MOD:DEX","-5"]],
-	"Off-kilter":	[["To Hit","-2"],["AC","-2","flat-footed"]],
+	"Fatigued":	[["AC","-1"],["To Hit","-1"],["Damage:melee","-1"],["Reflex","-1"],["Initiative","-1"],["Skills:DEX","-1"],["Skills:STR","-1"],"You cannot run or charge and you reduce your encumbered limit by 1 bulk"],
+	"Flat-footed":	[["AC","-2","flat-footed"], "You cannot take reactions or make attacks of opportunity"],
+	"Frightened":	[["All Skills","-2"],["To Hit","-2"],["All Saves","-2"], "You must flee or fight."],
+	"Grappled":	[["MULTI:Speed","0"],["AC","-2"],["To Hit","-2"],["Reflex","-2"],["Initiative","-2"],["Skills:DEX","-2"],"You cannot move or take two-handed actions and you cannot make attacks of opportunity"],
+	"Helpless":	[["MOD:DEX","-5"], "Melee attacks against you gain a +4 bonus."],
+	"Nauseated":	["You’re unable to attack, cast spells, or concentrate on spells, and the only action you can take is a single move action per turn."],
+	"Off-kilter":	[["To Hit","-2"],["AC","-2","flat-footed"], "You can’t take move actions except to right yourself and you cannot take reactions or make attacks of opportunity"],
 	"Off-target":	[["To Hit","-2"]],
 	"Overburdened":	[["MAX:Speed","5"],["Max Dex","0"],["Skills:DEX","-5"],["Skills:STR","-5"]],
-	"Panicked":	[["All Skills","-2"],["To Hit","-2"],["All Saves","-2"]],
-	"Paralyzed":	[["MOD:DEX","-5"]],
-	"Pinned":	[["MULTI:Speed","0"],["AC","-2","flat-footed"],["To Hit","-4"],["Reflex","-4"],["Initiative","-4"],["Skills:DEX","-4"]],
-	"Prone":	[["To Hit:melee","-4"]],
+	"Panicked":	[["All Skills","-2"],["To Hit","-2"],["All Saves","-2"], "You drop all held items; you flee at top speed; you cannot take other actionsand you cower if cornered."],
+	"Paralyzed":	[["MOD:DEX","-5"], "You cannot move and take only purely mental actions"],
+	"Pinned":	[["MULTI:Speed","0"],["AC","-2","flat-footed"],["To Hit","-4"],["Reflex","-4"],["Initiative","-4"],["Skills:DEX","-4"],"You cannot move or take two-handed actions and you cannot make attacks of opportunity"],
+	"Prone":	[["To Hit:melee","-4"],"You gain a +4 bonus to AC against ranged attacks, and a –4 penalty to AC against melee attacks"],
 	"Shaken":	[["All Skills","-2"],["To Hit","-2"],["All Saves","-2"]],
 	"Sickened":	[["All Skills","-2"],["To Hit","-2"],["All Saves","-2"],["Damage","-2"]],
-	"Stunned":	[["AC","-2","flat-footed"]]
+	"Stable":	["You’re no longer dying, but you are still unconscious."],
+	"Staggered":	["You can take only a single move or standard action each round and can’t take reactions, but you can take swift actions as normal."],
+	"Stunned":	[["AC","-2","flat-footed"], "You drop everything held; you can’t take actions"],
+	"Unconscious":	[["MOD:DEX","-5"],"You’re knocked out; melee attacks against you gain a +4 bonus."]
 };
 Object.keys(conditions).forEach(c => {
 	elements.conditions.push({
 		name: c,
-		effect: conditions[c].map(a => { return {
+		effect: conditions[c].filter(a => typeof a != "string").map(a => { return {
 			target: a[0],
 			bonus: a[1],
 			type: a[2]
-		}})
+		}}),
+		description:  conditions[c].find(a => typeof a == "string")
 	});
 	
 });
@@ -333,8 +353,8 @@ const bonus = {
   	},
   	show: function(bonuses) {
 		this.bonuses = bonuses || [];
-		var conditions = bonus.get(null, "condition");
-		this.bonuses = this.bonuses.concat(conditions.flatMap(b => elements.conditions.find(s => s.name == b.target).effect));
+		var conditions = bonus.get(null, "condition").map(b => elements.conditions.find(c => c.name == b.target));
+		this.bonuses = this.bonuses.concat(conditions.flatMap(c => c.effect));
 		var display = dom.get("display");
 		while (display.firstChild) display.removeChild(display.firstChild);
 		base.level = bonus.calculate("Level");
@@ -347,7 +367,11 @@ const bonus = {
 		base.attackType = attackType && attackType[0] ? attackType[0].bonus : "ranged";
 		if (conditions.length) {
 			var cat = dom.category(display, "conditions");
-			conditions.forEach(c => dom.create("span", { className: "box", innerHTML: c.target }, cat));
+			conditions.forEach(c => {
+				var box = dom.create("span", { className: "box"}, cat);
+				dom.create("span", { className: "label", innerHTML: c.name}, box);
+				dom.create("span", { className: "value", innerHTML: c.description || ""}, box);
+			});
 		}
 		Object.keys(elements).filter(c => c != "internal" && c != "conditions").forEach(category => {
 			var cat = dom.category(display, category);
