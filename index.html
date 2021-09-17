@@ -298,6 +298,7 @@ const bonus = {
 		this._reg = new Set();
 		var edit = dom.get("edit");
 		while (edit.firstChild) edit.removeChild(edit.firstChild);
+		bonus.grid("edit", "conditions", "condition", "conditions", "condition", 1);
 		["base", "race", "theme", "class", "ranks", "weapon", "armor"].forEach(c => dom.category(edit, c));
 		bonus.entry("base", "base_level", "internal:Level", "base");
 		elements.stats.forEach(s => bonus.entry("base", "base_"+s.name, "stats:"+s.name, "base"));
@@ -321,7 +322,6 @@ const bonus = {
 		bonus.entry("weapon", "weapon_damage_type", "internal:Damage Type", "weapon");
 		bonus.grid("edit", "feats", "feat bonus");
 		bonus.grid("edit", "other", "other bonus");
-		bonus.grid("edit", "conditions", "condition", "conditions", "condition", 1);
 		this._reg.forEach(widget => {
 			this.bonuses.forEach(bonus => { 
 				if (bonus.id && !widget.removable && bonus.id == widget.id) widget.set(bonus);
