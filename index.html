@@ -172,9 +172,9 @@ const elements = {
 };
 const conditions = {
 	"Asleep": 	[["Perception","-10"]],
-	"Bleeding:	["You take the listed damage at the beginning of your turn."],
+	"Bleeding":	["You take the listed damage at the beginning of your turn."],
 	"Blinded": 	[["AC","-2","flat-footed"],["Skills:STR","-4"],["Skills:DEX","-4"],["Perception","-4"],"You automatically fail Perception checks based on sight, opponents have total concealment against you, and you must succeed at a DC 10 Acrobatics check to move faster than half speed or else fall prone."],
-	"Burning:	["You take the listed fire damage each round, and you must be extinguished to end the condition."],
+	"Burning":	["You take the listed fire damage each round, and you must be extinguished to end the condition."],
 	"Confused":	["You treat all creatures as enemies, and you must roll on the table to determine your actions."],
 	"Cowering":	[["AC","-2","flat-footed"], "You can take no actions."],
 	"Dazed":	["You can take no actions."],
@@ -370,7 +370,7 @@ const bonus = {
 			conditions.forEach(c => {
 				var box = dom.create("span", { className: "box"}, cat);
 				dom.create("span", { className: "label", innerHTML: c.name}, box);
-				dom.create("span", { className: "value", innerHTML: c.description || ""}, box);
+				dom.create("span", { className: "value", innerHTML: c.description || "-"}, box);
 			});
 		}
 		Object.keys(elements).filter(c => c != "internal" && c != "conditions").forEach(category => {
