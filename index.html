@@ -22,10 +22,15 @@
 	padding: 0.2em 0.5em;
 	margin: 0.2em 2em 0em 0em;
 }
-.button {
-	float: right;
+#header .button {
 	background-color: blue;
+}
+.button {
+	border: 1px solid black;
+	float: right;
 	border-radius: 0.2em;
+	padding: 0.2em 0.5em;
+    	margin: 0.2em 0.2em 0em 0em;
 }
 body {
 	margin-top: 2.2em;
@@ -55,6 +60,9 @@ body, input, select {
 }
 .category:not(#skills) .box:not(#speed) > .value {
 	font-size: 2em;
+}
+#resources {
+	margin-bottom: 2em;
 }
 .subContainer {
 	text-align: center;
@@ -429,6 +437,16 @@ const bonus = {
 			dom.create("input", { id: "delta_"+r, type: "number" }, sub)
 			dom.create("span", {className: "subtract"}, sub, { click: ()=>site.applyResourceChange(r, false) });
 		});
+		dom.create("span", {className: "button", innerHTML: "10m rest"}, cat, { click: function() {
+			site.setResource("SP", "max");
+			site.updateResources();
+		}});
+		dom.create("span", {className: "button", innerHTML: "long rest"}, cat, { click: function() {
+			site.setResource("SP", "max");
+			site.setResource("RP", "max");
+			site._applyResourceChange("HP", base.level);
+			site.updateResources();
+		}});
 		site.updateResources();
 		Object.keys(elements).filter(c => c != "internal" && c != "conditions").forEach(category => {
 			var cat = dom.category(display, category);
@@ -604,6 +622,7 @@ const site = {
 		return entry.value;
 	},
 	setResource: function(resource, value) {
+		if (value == "max") value = bonus.calculate(resource);
 		if (typeof value != "number" || isNaN(value)) return;
 		if (value < 0) value = 0;
 		var store = site.load("resource");
