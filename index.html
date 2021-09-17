@@ -343,6 +343,7 @@ const bonus = {
 		var edit = dom.get("edit");
 		while (edit.firstChild) edit.removeChild(edit.firstChild);
 		bonus.grid("edit", "conditions", "condition", "conditions", "condition", 1);
+		bonus.grid("edit", "stat_damage", "ability damage", "stats", "damage");
 		["base", "race", "theme", "class", "ranks", "weapon", "armor"].forEach(c => dom.category(edit, c));
 		bonus.entry("base", "base_level", "internal:Level", "base");
 		elements.stats.forEach(s => bonus.entry("base", "base_"+s.name, "stats:"+s.name, "base"));
@@ -458,7 +459,13 @@ const bonus = {
 };
 const formula = {
 	_plus: num => typeof num != "undefined" ? (num>0 ? "+"+num : ""+num) : "",
-	stats: stat => Math.min(18, bonus.sum(bonus.get(stat, s=>["base","theme","racial"].includes(s.type)))) + bonus.sum(bonus.get(stat, s=>!["base","theme","racial"].includes(s.type))),
+	stats: stat => {
+		var baseTypes = ["base","theme","racial"];
+		var all = bonus.get(stat);
+		var base = Math.min(18, bonus.sum(all.filter(s => baseTypes.includes(s.type))));
+		var extra = bonus.sum(all.filter(s => !baseTypes.includes(s.type) && s.type != "damage"));
+		return base + extra;
+	},
 	skills: function(target) {
 		var skill = elements.skills.find(s => s.name == target);
 		var all = bonus.get(null, b => b.target == target || b.target == "All Skills");
@@ -480,6 +487,8 @@ const formula = {
 	statBonus: stat => {
 		var fixed = bonus.get("MOD:"+stat);
 		if (fixed && fixed.length) return fixed.map(bonus.evaluate).reduce((acc, curr) => Math.min(acc, curr));
+		var damage = bonus.sum(bonus.get(stat, s => s.type == "damage"));
+		damage = -Math.abs(parseInt(damage/2));
 		return Math.floor((bonus.calculate(stat)-10)/2)
 	},
 	saves: save => formula._plus(bonus.sum("All Saves") + bonus.sum(save) + base[elements.saves.find(s => s.name == save).stat]),
