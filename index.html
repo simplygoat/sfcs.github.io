@@ -87,7 +87,7 @@ body, input, select {
 	min-width: 5em;
 }
 .entry input[type="text"]{
-	width: 3em;
+	width: 5em;
 	text-align: end;
 }
 input, select {
@@ -97,6 +97,7 @@ input, select {
 	padding: 0em 0.2em 0em 0em;
 }
 select:disabled {
+	min-width: 10em;
 	opacity: 1;
 	color: black;
 	-webkit-appearance: none;
@@ -125,7 +126,7 @@ select:disabled {
 		<script>
 const elements = {
 	general: ["KAC", "EAC", "HP", "SP", "RP", "Initiative", "Speed"].map(e => { return { name: e }; }),
-	internal:["Level", "All Skills", "AC", "ACP", "Max Dex", "BAB"].map(e => { return { name: e }; }),
+	internal:["Level", "All Skills", "AC", "ACP", "Max Dex", "BAB", "Damage Type"].map(e => { return { name: e }; }),
 	stats:   ["STR", "DEX", "CON", "INT", "WIS", "CHA"].map(e => { return { name: e }; }),
 	saves:   [
 		{ name: "Fortitutde",	stat: "CON" },
@@ -275,15 +276,16 @@ const bonus = {
 		bonus.grid("class", "class_skills", "class skills", "skills", "class", true);
 		bonus.grid("class", "class_other", "other bonuses");
 		elements.skills.forEach(s => bonus.entry("ranks", "ranks_"+s.name, "skills:"+s.name, "rank"));
-    		["KAC", "EAC"].forEach(t => bonus.entry("armor", "armor_"+t, "general:"+t, "armor"));
+    		["KAC", "EAC", "Speed"].forEach(t => bonus.entry("armor", "armor_"+t, "general:"+t, "armor"));
 		["ACP", "Max Dex"].forEach(t => bonus.entry("armor", "armor_"+t, "internal:"+t, "armor"));
 		bonus.entry("weapon", "weapon_type", "general:Weapon Type", "weapon", false, ["ranged", "melee"]);
 		bonus.entry("weapon", "weapon_damage", "attack:Damage", "weapon");
+		bonus.entry("weapon", "weapon_damage_type", "internal:Damage Type", "weapon");
 		bonus.grid("edit", "feats", "feat bonus");
 		bonus.grid("edit", "other", "other bonus");
 		this._reg.forEach(widget => {
 			this.bonuses.forEach(bonus => { 
-				if (bonus.id && !widget.removable && bonus.id.startsWith(widget.id)) widget.set(bonus);
+				if (bonus.id && !widget.removable && bonus.id == widget.id) widget.set(bonus);
 			});
 		});
   	},
@@ -315,6 +317,7 @@ const bonus = {
   	get: function(target, filter) {
 		var map = this.bonuses
 			.filter(b => !target || b.target == target)
+			.filter(b => b.bonus && (b.bonus.length || b.bonus > 0))
 			.filter((typeof filter == "string") ? (b => b.type == filter) : filter || (b => true ))
 			.reduce((map, curr) => {
 				if (curr.type != "untyped" && bonus.type.includes(curr.type)) {
@@ -371,7 +374,7 @@ const formula = {
 		var res = val >= 0 ? "+" + val : val;
 		return !ranks && !skill.untrained ? "("+res+")" : res;
 	},
-	 statBonus: stat => Math.floor((bonus.calculate(stat)-10)/2),
+	statBonus: stat => Math.floor((bonus.calculate(stat)-10)/2),
 	saves: save => "+" + (bonus.sum(save) + base[elements.saves.find(s => s.name == save).stat]),
 	"Speed": ()=> {
 		var regex = /[0-9]{1,2}/;
@@ -395,7 +398,8 @@ const formula = {
 	"Initiative": ()=> "+" + (bonus.sum("Initiative") + base.DEX),
 	"To Hit": ()=> "+" + (bonus.sum("To Hit") + bonus.sum("BAB") + base[base.attackType == "ranged" ? "DEX" : "STR"]),
 	"Damage": function(target) {
-		var type = bonus.get("");
+		var type = bonus.get("Damage Type");
+		type = type && type[0] ? type[0].bonus : "?";
 		var result = bonus.get("Damage").reduce((acc,curr)=>{
 			var value = bonus.evaluate(curr);
 			if (value) acc.bonus += value;
@@ -403,7 +407,7 @@ const formula = {
 			return acc;
 		}, { base: "", bonus: 0});
 		if (base.attackType != "ranged") result.bonus += base.STR;
-		return result.base + (result.bonus ? "+" + result.bonus : "");
+		return result.base + (result.bonus ? "+" + result.bonus : "") + " " + type;
 	}
 };
 const site = {
