@@ -578,7 +578,7 @@ const site = {
 	applyResourceChange: function(resource, add) {
 		var element = dom.get("delta_"+resource);
 		try {
-			var change = Math.abs(parseInt(element.value));
+			var change = Math.abs(parseInt(element.value || "1"));
 			if (!add) change = -change;
 			site._applyResourceChange(resource, change);
 			site.updateResources();
