@@ -424,7 +424,9 @@ const formula = {
 		var regex = /[0-9]{1,2}/;
 		var speeds = bonus.get("Speed", b => b.type == "racial");
 		var mod = bonus.get("MULTI:Speed").reduce((acc, curr) => acc * bonus.evaluate(curr), 1);
-		var max = bonus.get("MAX:Speed").map(bonus.evaluate).reduce(Math.min);
+		var max = 0;
+		var fixed = bonus.get("MAX:Speed");
+		if (fixed && fixed.length) max = bonus.get("MAX:Speed").map(bonus.evaluate).reduce(Math.min);
 		return speeds.map(s => s.bonus).map(s => {
 			var match = regex.exec(s);
 			if (match && match[0]) {
