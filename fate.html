@@ -1,0 +1,121 @@
+<html>
+	<head>
+		<style>
+body {
+	max-width: 50em;
+	display: flex;
+	flex-direction: column;
+}
+h1 {
+	font-size: 1em;
+	margin: .2em 0 0 0
+}
+body > div {
+	display: flex;
+	padding: .3em;
+	border: 1px solid black;
+}
+body > div > *{
+	padding: .2em;
+}
+#aspects, #consequences {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+	gap: .2em;
+}
+#approaches > div {
+	white-space: nowrap;
+	display: flex;
+	align-items: center;
+}
+#approaches input {
+	width: 1.3em;
+	height: 1em;
+	font-size: 2em;
+	margin: .1em;
+}
+textarea {
+	font: inherit;
+	min-height: 6em;
+}
+#stress {
+	display: flex;
+	align-items: center;
+	text-align: center;
+}
+#stress input {
+	width: 2em;
+	height: 2em;
+	display: block;
+}
+		</style>
+	</head>
+	<body>
+		<input id="name" placeholder="Name"></input>
+		<h1>Basis</h1>
+		<div>
+			<div id="aspects">
+				<input id="concept" placeholder="High Concept"></input>
+				<input id="trouble" placeholder="Trouble"></input>
+				<input id="unique"  placeholder="Unique Thing"></input>
+				<input id="bond"    placeholder="Bond"></input>
+				<h1>Stunts</h1>
+				<textarea id="stunts"></textarea>
+			</div>
+			<div id="approaches">
+				<div><input type="number" value="0" id="careful" ></input><label for="careful" >Geschickt (careful)</label></div>
+				<div><input type="number" value="0" id="flashy"  ></input><label for="flashy"  >Obsz&ouml;n (flashy)</label></div>
+				<div><input type="number" value="0" id="forceful"></input><label for="forceful">Brutal (forceful)</label></div>
+				<div><input type="number" value="0" id="clever"  ></input><label for="clever"  >Listreich (clever)</label></div>
+				<div><input type="number" value="0" id="quick"   ></input><label for="quick"   >Instinktiv (quick)</label></div>
+				<div><input type="number" value="0" id="sneaky"  ></input><label for="careful" >Niedertr&auml;chtig (sneaky)</label></div>
+			</div>
+		</div>
+		<h1>Conflict</h1>
+		<div>
+			<div id="stress">
+				<div><input type="checkbox" id="stress1"></input><label for="stress1">1</label></div>
+				<div><input type="checkbox" id="stress2"></input><label for="stress2">2</label></div>
+				<div><input type="checkbox" id="stress3"></input><label for="stress3">3</label></div>
+			</div>
+			<div id="consequences">			
+				<input id="mild"     placeholder="[2] Mild Consequence"></input>
+				<input id="moderate" placeholder="[4] Moderate Consequence"></input>
+				<input id="severe"   placeholder="[6] Severe Consequence"></input>
+			</div>
+		</div>
+		<script>
+		var localName = "fate_accelerated_data";
+		function load() {
+			var storage = localStorage.getItem(localName);
+			if (storage) storage = JSON.parse(storage);
+			else storage = {};
+			return storage;
+		}
+		function save(name, value) {
+			var storage = load();
+			storage[name] = value;
+			localStorage.setItem(localName, JSON.stringify(storage));
+		}
+		function saveElement() {
+			console.log("saved");
+			var val = (this.type == "checkbox") ? this.checked : this.value;
+			save(this.id, val);
+		}
+		function updateElement(id, val) {
+			var input = document.getElementById(id);
+			if (input.type == "checkbox") input.checked = val;
+			else input.value = val;
+		}
+		Object.entries(load()).forEach(e=>updateElement(e[0],e[1]));
+		var inputs = document.getElementsByTagName("input");
+		for (var i = 0; i < inputs.length; i++) {
+			var input = inputs[i];
+			input.addEventListener("input", saveElement.bind(input));
+		}
+		var stunts = document.getElementById("stunts");
+		stunts.addEventListener("input", saveElement.bind(stunts));
+		</script>
+	</body>
+</html>
