@@ -14,7 +14,7 @@ const days = {
   /*Day 1*/ depthChecker: {
     map: line => parseInt(line),
     simple: lines => lines.reduce((a,v,i) => (a + ((i > 0 && v > lines[i-1])? 1:0)), 0),
-    hard: lines => days.depthReader.simple(lines.map((v,i,l) => (l.slice(i,i+3).reduce((a,v) => a+v))))
+    hard: lines => days.depthChecker.simple(lines.map((v,i,l) => (l.slice(i,i+3).reduce((a,v) => a+v))))
   }
 };
 Object.keys(days).forEach((e,i) => {
