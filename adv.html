@@ -24,11 +24,11 @@ Object.keys(days).forEach((e,i) => {
   select.appendChild(opt);
 });
 $id("button").addEventListener("click", function() {
-	var lines = $id("sample").value.split("\n");
-	var alg = days[select.value];
-	if (alg.map) lines = lines.map(alg.map);
-	var run = (fun,lines) => fun? fun(lines):"??";
-	$id("result").innerHTML = "Results: " + run(alg.simple,lines) + " / " + run(alg.hard,lines);
+  var lines = $id("sample").value.split("\n");
+  var alg = days[select.value];
+  if (alg.map) lines = lines.map(alg.map);
+  var run = (fun,lines) => fun? fun(lines):"??";
+  $id("result").innerHTML = "Results: " + run(alg.simple,lines) + " / " + run(alg.hard,lines);
 });
     </script>
   </body>
