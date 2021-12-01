@@ -1,0 +1,35 @@
+<html>
+  <header>
+    <title>Advent of Code: Solutions</title>
+  </header>
+	<body>
+		<div id="result" style="height:1em; background-color:lightgray; border:1px dashed black; padding:.2em; margin:.2em"></div>
+		<select id="select"></select>
+		<input id="button" type="button" value="Start"></input>
+		<textarea id="sample" style="display:block; height:40em; width: 40em; margin-top:1em"></textarea>
+		<script>
+const $id = document.getElementById.bind(document);
+const select = $id("select");<html>
+const days = {
+  /*Day 1*/ depthChecker: {
+    map: line => parseInt(line),
+    simple: lines => lines.reduce((a,v,i) => (a + ((i > 0 && v > lines[i-1])? 1:0)), 0),
+    hard: lines => days.depthReader.simple(lines.map((v,i,l) => (l.slice(i,i+3).reduce((a,v) => a+v))))
+  }
+}
+Object.keys(days).forEach((e,i) => {
+  var opt = document.createElement("option");
+  opt.value = e;
+  opt.innerHTML = "Day " + (i+1) + ": " + e;
+  select.appendChild(opt);
+});
+$id("button").addEventListener("click", function() {
+	var lines = $id("sample").value.split("\n");
+	var alg = days[select.value];
+	if (alg.map) lines = lines.map(alg.map);
+	var run = (fun,lines) => fun? fun(lines):"??";
+	$id("result").innerHTML = "Results: " + run(alg.simple,lines) + " / " + run(alg.hard,lines);
+});
+    </script>
+	</body>
+</html>
