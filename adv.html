@@ -19,22 +19,22 @@ const days = [{},
   }, {
     name: "Submarine Control",
     subMarine: {
-      d: 0, p: 0, a: 0,
-      up: function(v) { this.aimed? this.a-=v:this.d-=v },
-      down: function(v) { this.up(-v) },
-      forward: function(v) {
-        this.p+=v;
-        if(this.aimed) this.d+=(this.a*v);
+      depth: 0, position: 0, aim: 0,
+      up: function(value) { this.aimed? (this.aim -= value):(this.depth -= value) },
+      down: function(value) { this.up(-value) },
+      forward: function(value) {
+        this.position += value;
+        if(this.aimed) this.depth += this.aim * value;
       },
       command: function(c) { 
         this[c[0]](parseInt(c[1]));
         return this;
       },
-      result: function() { return this.p * this.d }
+      result: function() { return this.position * this.depth }
     },
     map: line => line.split(" "),
-    simple: lines => lines.reduce((a, c) => a.command(c), Object.assign({},days[2].subMarine)).result(),
-    hard: lines => lines.reduce((a, c) => a.command(c), Object.assign({aimed:true},days[2].subMarine)).result()
+    simple: lines => lines.reduce((a, c) => a.command(c), Object.assign({}, days[2].subMarine)).result(),
+    hard: lines => lines.reduce((a, c) => a.command(c), Object.assign({aimed:true}, days[2].subMarine)).result()
   }
 ];
 const day = new Date().getDate();
