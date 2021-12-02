@@ -10,17 +10,40 @@
     <script>
 const $id = document.getElementById.bind(document);
 const select = $id("select");
-const days = {
-  /*Day 1*/ depthChecker: {
+const days = [{},
+  {
+    name: "Depth Checker",
     map: line => parseInt(line),
     simple: lines => lines.reduce((a,v,i) => (a + ((i > 0 && v > lines[i-1])? 1:0)), 0),
-    hard: lines => days.depthChecker.simple(lines.map((v,i,l) => (l.slice(i,i+3).reduce((a,v) => a+v))))
+    hard: lines => days[1].simple(lines.map((v,i,l) => (l.slice(i,i+3).reduce((a,v) => a+v))))
+  }, {
+    name: "Submarine Control",
+    subMarine: {
+      d: 0, p: 0, a: 0,
+      up: function(v) { this.aimed? this.a-=v:this.d-=v },
+      down: function(v) { this.up(-v) },
+      forward: function(v) {
+        this.p+=v;
+        if(this.aimed) this.d+=(this.a*v);
+      },
+      command: function(c) { 
+        this[c[0]](parseInt(c[1]));
+        return this;
+      },
+      result: function() { return this.p * this.d }
+    },
+    map: line => line.split(" "),
+    simple: lines => lines.reduce((a, c) => a.command(c), Object.assign({},days[2].subMarine)).result(),
+    hard: lines => lines.reduce((a, c) => a.command(c), Object.assign({aimed:true},days[2].subMarine)).result()
   }
-};
-Object.keys(days).forEach((e,i) => {
+];
+const day = new Date().getDate();
+days.forEach((e,i) => {
+  if (i == 0) return;
   var opt = document.createElement("option");
-  opt.value = e;
-  opt.innerHTML = "Day " + (i+1) + ": " + e;
+  opt.value = i;
+  opt.innerHTML = "Day " + i + ": " + e.name;
+  if (i == day) opt.selected = "selected";
   select.appendChild(opt);
 });
 $id("button").addEventListener("click", function() {
