@@ -44,7 +44,7 @@ const days = [{},
     hardFilter: (lines,invert) => {
       for (var i = 0; lines.length > 1; i++) {
         var commonBit = lines.map(l => l[i]).reduce((a,c)=>a+c) >= (lines.length/2)? (invert?0:1):(invert?1:0);
-      lines = lines.filter(l => l[i] == commonBit);
+        lines = lines.filter(l => l[i] == commonBit);
       }
       return parseInt(lines[0].join(""),2);
     }
