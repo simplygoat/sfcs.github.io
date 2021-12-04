@@ -20,12 +20,12 @@ Array.prototype.visit = function(visitor) {
 };
 const days = [{},
 	{
-		name: "Depth Checker",
+		name: "Sonar Sweep",
 		map: line => parseInt(line),
 		simple: lines => lines.reduce((a,v,i) => (a + ((i > 0 && v > lines[i-1])? 1:0)), 0),
 		hard: lines => days[1].simple(lines.map((v,i,l) => (l.slice(i,i+3).reduce((a,v) => a+v))))
 	}, {
-		name: "Submarine Control",
+		name: "Dive! (Submarine Control)",
 		subMarine: {
 			depth: 0, position: 0, aim: 0,
 			up: function(value) { this.aimed? (this.aim -= value):(this.depth -= value) },
@@ -44,7 +44,7 @@ const days = [{},
 		simple: lines => lines.reduce((a, c) => a.command(c), Object.assign({}, days[2].subMarine)).result(),
 		hard: lines => lines.reduce((a, c) => a.command(c), Object.assign({aimed:true}, days[2].subMarine)).result()
 	}, {
-		name: "Power Supply",
+		name: "Binary Diagnostic",
 		map: line => [...line].map(c => parseInt(c)),
 		simple: lines => days[3].simpleProduct(lines.reduce((a,c)=> c.map((v,i)=>v+a[i])).map(v => v > (lines.length/2)? 1:0).join("")),
 		simpleProduct: r => parseInt(r,2) * (~parseInt(r,2) & (Math.pow(2,r.length)-1)),
@@ -57,7 +57,7 @@ const days = [{},
 			return parseInt(lines[0].join(""),2);
 		}
 	}, {
-		name: "Squid Bingo!",
+		name: "Giant Squid (Bingo!)",
 		board: {
 			add: function(line) { this.r.push(line.split(" ").filter(n => n.length > 0).map(n => parseInt(n)).visit((n,i) => this.c[i].push(n))) },
 			mark: function(number) { this.c.concat(this.r).forEach(a => a.cut(number)) },
