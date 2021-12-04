@@ -57,7 +57,7 @@ const days = [{},
 			return parseInt(lines[0].join(""),2);
 		}
 	}, {
-		name: "Squid Bingo",
+		name: "Squid Bingo!",
 		board: {
 			add: function(line) { this.r.push(line.split(" ").filter(n => n.length > 0).map(n => parseInt(n)).visit((n,i) => this.c[i].push(n))) },
 			mark: function(number) { this.c.concat(this.r).forEach(a => a.cut(number)) },
