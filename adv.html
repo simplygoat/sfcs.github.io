@@ -1,71 +1,97 @@
 <html>
-  <header>
-    <title>Advent of Code: Solutions</title>
-  </header>
-  <body>
-    <div id="result" style="height:1em; background-color:lightgray; border:1px dashed black; padding:.2em; margin:.2em"></div>
-    <select id="select"></select>
-    <input id="button" type="button" value="Start"></input>
-    <textarea id="sample" style="display:block; height:40em; width: 40em; margin-top:1em"></textarea>
-    <script>
+	<header>
+		<title>Advent of Code: Solutions</title>
+	</header>
+	<body>
+		<div id="result" style="height:1em; background-color:lightgray; border:1px dashed black; padding:.2em; margin:.2em"></div>
+		<select id="select"></select>
+		<input id="button" type="button" value="Start"></input>
+		<textarea id="sample" style="display:block; height:40em; width: 40em; margin-top:1em"></textarea>
+		<script>
+Array.prototype.cut = function(value) {
+	do {
+		var index = typeof value == "function"? this.findIndex(value) : this.indexOf(value);
+		if (index >= 0) this.splice(index, 1);
+	} while(index >= 0);
+};
+Array.prototype.visit = function(visitor) {
+	this.forEach(visitor);
+	return this;
+};
+const days = [{},
+	{
+		name: "Depth Checker",
+		map: line => parseInt(line),
+		simple: lines => lines.reduce((a,v,i) => (a + ((i > 0 && v > lines[i-1])? 1:0)), 0),
+		hard: lines => days[1].simple(lines.map((v,i,l) => (l.slice(i,i+3).reduce((a,v) => a+v))))
+	}, {
+		name: "Submarine Control",
+		subMarine: {
+			depth: 0, position: 0, aim: 0,
+			up: function(value) { this.aimed? (this.aim -= value):(this.depth -= value) },
+			down: function(value) { this.up(-value) },
+			forward: function(value) {
+				this.position += value;
+				if(this.aimed) this.depth += this.aim * value;
+			},
+			command: function(c) { 
+				this[c[0]](parseInt(c[1]));
+				return this;
+			},
+			result: function() { return this.position * this.depth }
+		},
+		map: line => line.split(" "),
+		simple: lines => lines.reduce((a, c) => a.command(c), Object.assign({}, days[2].subMarine)).result(),
+		hard: lines => lines.reduce((a, c) => a.command(c), Object.assign({aimed:true}, days[2].subMarine)).result()
+	}, {
+		name: "Power Supply",
+		map: line => [...line].map(c => parseInt(c)),
+		simple: lines => days[3].simpleProduct(lines.reduce((a,c)=> c.map((v,i)=>v+a[i])).map(v => v > (lines.length/2)? 1:0).join("")),
+		simpleProduct: r => parseInt(r,2) * (~parseInt(r,2) & (Math.pow(2,r.length)-1)),
+		hard: lines => days[3].hardFilter(lines,true)*days[3].hardFilter(lines,false),
+		hardFilter: (lines,invert) => {
+			for (var i = 0; lines.length > 1; i++) {
+				var commonBit = lines.map(l => l[i]).reduce((a,c)=>a+c) >= (lines.length/2)? (invert?0:1):(invert?1:0);
+				lines = lines.filter(l => l[i] == commonBit);
+			}
+			return parseInt(lines[0].join(""),2);
+		}
+	}, {
+		name: "Squid Bingo",
+		board: {
+			add: function(line) { this.r.push(line.split(" ").filter(n => n.length > 0).map(n => parseInt(n)).visit((n,i) => this.c[i].push(n))) },
+			mark: function(number) { this.c.concat(this.r).forEach(a => a.cut(number)) },
+			isFinished: function() { return this.c.some(a => a.length == 0) || this.r.some(a => a.length == 0) }
+		},
+		simple: lines => days[4].play(lines, bs => bs.find(b => b.isFinished())),
+		hard: lines => days[4].play(lines, bs => bs.length == 1? (bs.find(b => b.isFinished())):(bs.cut(b => b.isFinished()))),
+		play: function(lines, winCon) {
+			var number, numbers = lines[0].split(",").map(n => parseInt(n));
+			var board, boards = [];
+			for (var i = 1; i < lines.length; i++) lines[i].length? board.add(lines[i]):boards.push(board = Object.assign({}, days[4].board, {c:[[],[],[],[],[]],r:[]}));
+			for (var i = 0, board = null; !board; i++)  board = winCon(boards.visit(b => b.mark(number = numbers[i])));
+			return board.c.flat().reduce((a,c)=>a+c) * number;
+		}
+	}
+];
 const $id = document.getElementById.bind(document);
 const select = $id("select");
-const days = [{},
-  {
-    name: "Sonar Sweep",
-    map: line => parseInt(line),
-    simple: lines => lines.reduce((a,v,i) => (a + ((i > 0 && v > lines[i-1])? 1:0)), 0),
-    hard: lines => days[1].simple(lines.map((v,i,l) => (l.slice(i,i+3).reduce((a,v) => a+v))))
-  }, {
-    name: "Dive! (Submarine Control)",
-    subMarine: {
-      depth: 0, position: 0, aim: 0,
-      up: function(value) { this.aimed? (this.aim -= value):(this.depth -= value) },
-      down: function(value) { this.up(-value) },
-      forward: function(value) {
-        this.position += value;
-        if(this.aimed) this.depth += this.aim * value;
-      },
-      command: function(c) { 
-        this[c[0]](parseInt(c[1]));
-        return this;
-      },
-      result: function() { return this.position * this.depth }
-    },
-    map: line => line.split(" "),
-    simple: lines => lines.reduce((a, c) => a.command(c), Object.assign({}, days[2].subMarine)).result(),
-    hard: lines => lines.reduce((a, c) => a.command(c), Object.assign({aimed:true}, days[2].subMarine)).result()
-  }, {
-    name: "Binary Diagnostic",
-    map: line => [...line].map(c => parseInt(c)),
-    simple: lines => days[3].simpleProduct(lines.reduce((a,c)=> c.map((v,i)=>v+a[i])).map(v => v > (lines.length/2)? 1:0).join("")),
-    simpleProduct: r => parseInt(r,2) * (~parseInt(r,2) & (Math.pow(2,r.length)-1)),
-    hard: lines => days[3].hardFilter(lines,true)*days[3].hardFilter(lines,false),
-    hardFilter: (lines,invert) => {
-      for (var i = 0; lines.length > 1; i++) {
-        var commonBit = lines.map(l => l[i]).reduce((a,c)=>a+c) >= (lines.length/2)? (invert?0:1):(invert?1:0);
-        lines = lines.filter(l => l[i] == commonBit);
-      }
-      return parseInt(lines[0].join(""),2);
-    }
-  }
-];
 const day = new Date().getDate();
 days.forEach((e,i) => {
-  if (i == 0) return;
-  var opt = document.createElement("option");
-  opt.value = i;
-  opt.innerHTML = "Day " + i + ": " + e.name;
-  if (i == day) opt.selected = "selected";
-  select.appendChild(opt);
+	if (i == 0) return;
+	var opt = document.createElement("option");
+	opt.value = i;
+	opt.innerHTML = "Day " + i + ": " + e.name;
+	if (i == day) opt.selected = "selected";
+	select.appendChild(opt);
 });
 $id("button").addEventListener("click", function() {
-  var lines = $id("sample").value.split("\n");
-  var alg = days[select.value];
-  if (alg.map) lines = lines.map(alg.map);
-  var run = (fun,lines) => fun? fun(lines):"??";
-  $id("result").innerHTML = "Results: " + run(alg.simple,lines) + " / " + run(alg.hard,lines);
+	var lines = $id("sample").value.split("\n");
+	var alg = days[select.value];
+	if (alg.map) lines = lines.map(alg.map);
+	var run = (fun,lines) => fun? fun(lines):"??";
+	$id("result").innerHTML = "Results: " + run(alg.simple,lines) + " / " + run(alg.hard,lines);
 });
-    </script>
-  </body>
+		</script>
+	</body>
 </html>
