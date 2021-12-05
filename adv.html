@@ -72,6 +72,29 @@ const days = [{},
 			for (var i = 0, board = null; !board; i++)  board = winCon(boards.visit(b => b.mark(number = numbers[i])));
 			return board.c.flat().reduce((a,c)=>a+c) * number;
 		}
+	}, {
+		name: "Vent Lines",
+		map: line => days[5].parseLine(line.split(" -> ").map(s => s.split(","))),
+		parseLine: array => { return {
+			from: { x: parseInt(array[0][0]), y: parseInt(array[0][1]) },
+			to: { x: parseInt(array[1][0]), y: parseInt(array[1][1]) },
+			calc: function(advanced) {
+				var result = [];
+				if (this.from.x == this.to.x) for (var i = Math.min(this.from.y, this.to.y); i <= Math.max(this.from.y, this.to.y); i++) result.push(this.from.x+","+i);
+				else if (this.from.y == this.to.y) for (var i = Math.min(this.from.x, this.to.x); i <= Math.max(this.from.x, this.to.x); i++) result.push(i+","+this.from.y);
+				else if (advanced) {
+					var from = (this.from.x < this.to.x)?this.from:this.to, to = (this.from.x < this.to.x)?this.to:this.from;
+					for (var i = 0; (from.x+i) <= to.x; i++) result.push((from.x+i)+","+((from.y < to.y)?from.y+i:from.y-i));
+				}
+				return result;
+			}
+		}},
+		simple: lines => days[5].calc(lines, false),
+		hard: lines => days[5].calc(lines, true),
+		calc: (lines, advanced) => Object.entries(lines.reduce((a,l)=>{
+			l.calc(advanced).forEach(p => a[p]? a[p]++:a[p]=1);
+			return a;
+		},{})).filter(e => e[1] >= 2).length
 	}
 ];
 const $id = document.getElementById.bind(document);
