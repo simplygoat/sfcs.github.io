@@ -104,7 +104,7 @@ const days = [{},
 		hard: lines => days[6].calc(lines, 256),
 		calc: (lines, depth) => {
 			var f = lines[0].split(",").map(s => parseInt(s)).collect((a,c)=>a[c]++,[0,0,0,0,0,0,0,0,0]);
-			for (var i = 0; i < depth; i++) f = [f[1],f[2],f[3],f[4],f[5],f[6],f[7]+f[0],f[8],f[0]];
+			for (var i = 0; i < depth; i++) f[(7+i)%9]+=f[i%9];
 			return f.reduce((a,c)=>a+c);
 		}
 	}
