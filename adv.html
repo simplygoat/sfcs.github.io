@@ -120,6 +120,8 @@ days.forEach((e,i) => {
 	if (i == day) opt.selected = "selected";
 	select.appendChild(opt);
 });
+$id("sample").value = localStorage.getItem("simplygoat.aoc.sample") || "";
+$id("sample").addEventListener("input", ()=>localStorage.setItem("simplygoat.aoc.sample", $id("sample").value));
 $id("button").addEventListener("click", function() {
 	var lines = $id("sample").value.split("\n");
 	var time = performance.now();
