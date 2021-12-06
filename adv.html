@@ -126,7 +126,7 @@ $id("button").addEventListener("click", function() {
 	var alg = days[select.value];
 	if (alg.map) lines = lines.map(alg.map);
 	var run = (fun,lines) => fun? fun(lines):"??";
-	$id("result").innerHTML = "Results: " + run(alg.simple,lines) + " / " + run(alg.hard,lines) + " (" + (performance.now()-time).toPrecision(2) + "ms)";
+	$id("result").innerHTML = "Results: " + run(alg.simple,lines) + " / " + run(alg.hard,lines) + " (" + (performance.now()-time).toFixed(2) + "ms)";
 });
 		</script>
 	</body>
