@@ -34,21 +34,18 @@ const days = [{},
 		name: "Dive! (Submarine Control)",
 		subMarine: {
 			depth: 0, position: 0, aim: 0,
-			up: function(value) { this.aimed? (this.aim -= value):(this.depth -= value) },
+			up: function(value) { this[this.aimed? "aim":"depth"] -= value },
 			down: function(value) { this.up(-value) },
 			forward: function(value) {
 				this.position += value;
 				if(this.aimed) this.depth += this.aim * value;
 			},
-			command: function(c) { 
-				this[c[0]](parseInt(c[1]));
-				return this;
-			},
 			result: function() { return this.position * this.depth }
 		},
 		map: line => line.split(" "),
-		simple: lines => lines.reduce((a, c) => a.command(c), Object.assign({}, days[2].subMarine)).result(),
-		hard: lines => lines.reduce((a, c) => a.command(c), Object.assign({aimed:true}, days[2].subMarine)).result()
+		simple: {},
+		hard: {aimed: true},
+		calc: (lines, temp) => lines.collect((a, c) => a[c[0]](parseInt(c[1])), Object.assign({}, days[2].subMarine, temp)).result(),
 	}, {
 		name: "Binary Diagnostic",
 		map: line => [...line].map(c => parseInt(c)),
@@ -69,9 +66,9 @@ const days = [{},
 			mark: function(number) { this.c.concat(this.r).forEach(a => a.cut(number)) },
 			isFinished: function() { return this.c.some(a => a.length == 0) || this.r.some(a => a.length == 0) }
 		},
-		simple: lines => days[4].play(lines, bs => bs.find(b => b.isFinished())),
-		hard: lines => days[4].play(lines, bs => bs.length == 1? (bs.find(b => b.isFinished())):(bs.cut(b => b.isFinished()))),
-		play: function(lines, winCon) {
+		simple: bs => bs.find(b => b.isFinished()),
+		hard: bs => bs.length == 1? (bs.find(b => b.isFinished())):(bs.cut(b => b.isFinished())),
+		calc: function(lines, winCon) {
 			var number, numbers = lines[0].split(",").map(n => parseInt(n));
 			var board, boards = [];
 			for (var i = 1; i < lines.length; i++) lines[i].length? board.add(lines[i]):boards.push(board = Object.assign({}, days[4].board, {c:[[],[],[],[],[]],r:[]}));
@@ -95,13 +92,13 @@ const days = [{},
 				return result;
 			}
 		}},
-		simple: lines => days[5].calc(lines, false),
-		hard: lines => days[5].calc(lines, true),
+		simple: false,
+		hard: true,
 		calc: (lines, advanced) => Object.entries(lines.collect((a,l) => l.calc(advanced).forEach(p => a[p]? a[p]++:a[p]=1))).filter(e => e[1]>=2).length
 	}, {
 		name: "Lanternfish Growth Monitor",
-		simple: line => days[6].calc(line, 80),
-		hard: line => days[6].calc(line, 256),
+		simple: 80,
+		hard: 256,
 		calc: (line, depth) => {
 			var f = line.split(",").map(s => parseInt(s)).collect((a,c) => a[c]++, Array(9).fill(0));
 			for (var i = 0; i < depth; i++) f[(7+i)%9] += f[i%9];
@@ -110,8 +107,8 @@ const days = [{},
 	}, {
 		name: "Crab Alignment",
 		map: line => line.split(",").map(s => parseInt(s)),
-		simple: line => days[7].calc(line, d => d),
-		hard: line => days[7].calc(line, d => d*((d+1)/2)),
+		simple: d => d,
+		hard: d => d*((d+1)/2),
 		calc: (line, d) => Array(Math.max(...line)).fill().map((v,i) => line.map(n => d(Math.abs(n-i))).reduce((a,c) => a+c)).sort((a,b) => a-b)[0]
 	}
 ];
@@ -135,7 +132,7 @@ $id("button").addEventListener("click", function() {
 	var alg = days[select.value];
 	if (alg.map) lines = lines.map(alg.map);
 	if (lines.length == 1) lines = lines[0];
-	var run = (fun,lines) => fun? fun(lines):"??";
+    var run = (fun,lines) => typeof fun!="undefined"? (alg.calc? alg.calc(lines,fun):fun(lines)):"??";
 	$id("result").innerHTML = "Results: " + run(alg.simple,lines) + " / " + run(alg.hard,lines) + " (" + (performance.now()-time).toFixed(2) + "ms)";
 });
 		</script>
