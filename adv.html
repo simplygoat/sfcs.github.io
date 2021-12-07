@@ -22,9 +22,9 @@ Array.prototype.collect = function(reduction, initial) {
 	return this.reduce((a,c) => {
 		reduction(a,c);
 		return a;
-	},initial||{});
+	}, initial||{});
 };
-Array.construct = (size, supplier) => Array(size).fill().map((v,i)=>supplier(i));
+Array.build = (size, supplier) => Array(size).fill().map((v,i)=>supplier(i));
 const days = [{},
 	{
 		name: "Sonar Sweep",
@@ -81,7 +81,7 @@ const days = [{},
 		map: line => line.split(" -> ").map(s => s.split(",").map(s => parseInt(s))),
 		easy: (f,t) => f[0]==t[0] || f[1]==t[1],
 		hard: (f,t) => true,
-		points: (f,t) => Array.construct(Math.max(Math.abs(f[0]-t[0]),Math.abs(f[1]-t[1]))+1, i => Array.construct(2,n => f[n]+i*(f[n]>t[n]?-1:(f[n]<t[n]?1:0)))),
+		points: (f,t) => Array.build(Math.max(Math.abs(f[0]-t[0]),Math.abs(f[1]-t[1]))+1, i => Array.build(2,n => f[n]+i*(f[n]>t[n]?-1:(f[n]<t[n]?1:0)))),
 		calc: (lines, valid) => Object.entries(lines.filter(l => valid(...l)).collect((a,l) => days[5].points(...l).forEach(p => a[p]?a[p]++:a[p]=1))).filter(e => e[1]>=2).length
 	}, {
 		name: "Lanternfish Growth Monitor",
@@ -97,33 +97,24 @@ const days = [{},
 		map: line => line.split(",").map(s => parseInt(s)),
 		easy: d => d,
 		hard: d => d*((d+1)/2),
-		calc: (line, d) => Array.construct(Math.max(...line), i => line.map(n => d(Math.abs(n-i))).reduce((a,c) => a+c)).sort((a,b) => a-b)[0]
+		calc: (line, d) => Array.build(Math.max(...line), i => line.map(n => d(Math.abs(n-i))).reduce((a,c) => a+c)).sort((a,b) => a-b)[0]
 	}
 ];
-const $id = document.getElementById.bind(document);
-const select = $id("select"), sample = $id("sample");
-const updateSample = ()=>sample.value = localStorage.getItem("simplygoat.aoc.sample."+select.value) || "";
-const day = new Date().getDate();
-days.forEach((e,i) => {
-	if (i == 0) return;
-	var opt = document.createElement("option");
-	opt.value = i;
-	opt.innerHTML = "Day " + i + ": " + e.name;
-	if (i == day) opt.selected = "selected";
-	select.appendChild(opt);
-});
-select.addEventListener("change", updateSample);
-updateSample();
-$id("button").addEventListener("click", function() {
+let $id = document.getElementById.bind(document),
+	select = $id("select"),
+	sample = $id("sample"),
+	button = $id("button"),
+	day = new Date().getDate(),
+	store = ()=>sample.value = localStorage.getItem("simplygoat.aoc.sample."+select.value) || "";
+days.forEach((e,i) => i>0? select.appendChild(Object.assign(document.createElement("option"), { value: i, innerHTML: `Day ${i}: ${e.name}`, selected: i==day? "selected":null })):null);
+select.addEventListener("change", store, store());
+button.addEventListener("click", () => {
 	localStorage.setItem("simplygoat.aoc.sample."+select.value, sample.value);
-	var lines = sample.value.split("\n");
-	if (!lines[lines.length-1].length)lines.splice(-1);
-	var time = performance.now();
-	var alg = days[select.value];
-	if (alg.map) lines = lines.map(alg.map);
-	if (lines.length == 1) lines = lines[0];
-	var run = (fun,lines) => typeof fun!="undefined"? (alg.calc? alg.calc(lines,fun):fun(lines)):"??";
-	$id("result").innerHTML = "Results: " + run(alg.easy,lines) + " / " + run(alg.hard,lines) + " (" + (performance.now()-time).toFixed(2) + "ms)";
+	let t = performance.now(),
+		d = days[select.value],
+		l = sample.value.split("\n").filter((l,i,a) => i!=a.length-1||l.length).map(d.map||(e=>e)),
+		r = (f,l)=>typeof f!="undefined"?(d.calc? d.calc(l.length==1? l[0]:l,f):f(l.length==1? l[0]:l)):"??";
+	$id("result").innerHTML = `Results: ${r(d.easy,l)} / ${r(d.hard,l)} (${(performance.now()-t).toFixed(2)}ms)`;
 });
 		</script>
 	</body>
