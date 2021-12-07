@@ -24,12 +24,13 @@ Array.prototype.collect = function(reduction, initial) {
 		return a;
 	},initial||{});
 };
+Array.construct = (size, supplier) => Array(size).fill().map((v,i)=>supplier(i));
 const days = [{},
 	{
 		name: "Sonar Sweep",
 		map: line => parseInt(line),
-		simple: lines => lines.reduce((a,v,i) => (a + ((i > 0 && v > lines[i-1])? 1:0)), 0),
-		hard: lines => days[1].simple(lines.map((v,i,l) => (l.slice(i,i+3).reduce((a,v) => a+v))))
+		easy: lines => lines.reduce((a,v,i) => (a + ((i > 0 && v > lines[i-1])? 1:0)), 0),
+		hard: lines => days[1].easy(lines.map((v,i,l) => (l.slice(i,i+3).reduce((a,v) => a+v))))
 	}, {
 		name: "Dive! (Submarine Control)",
 		subMarine: {
@@ -43,14 +44,14 @@ const days = [{},
 			result: function() { return this.position * this.depth }
 		},
 		map: line => line.split(" "),
-		simple: {},
+		easy: {},
 		hard: {aimed: true},
 		calc: (lines, temp) => lines.collect((a, c) => a[c[0]](parseInt(c[1])), Object.assign({}, days[2].subMarine, temp)).result(),
 	}, {
 		name: "Binary Diagnostic",
 		map: line => [...line].map(c => parseInt(c)),
-		simple: lines => days[3].simpleProduct(lines.reduce((a,c)=> c.map((v,i)=>v+a[i])).map(v => v > (lines.length/2)? 1:0).join("")),
-		simpleProduct: r => parseInt(r,2) * (~parseInt(r,2) & (Math.pow(2,r.length)-1)),
+		easy: lines => days[3].easyProduct(lines.reduce((a,c)=> c.map((v,i)=>v+a[i])).map(v => v > (lines.length/2)? 1:0).join("")),
+		easyProduct: r => parseInt(r,2) * (~parseInt(r,2) & (Math.pow(2,r.length)-1)),
 		hard: lines => days[3].hardFilter(lines,true)*days[3].hardFilter(lines,false),
 		hardFilter: (lines,invert) => {
 			for (var i = 0; lines.length > 1; i++) {
@@ -66,7 +67,7 @@ const days = [{},
 			mark: function(number) { this.c.concat(this.r).forEach(a => a.cut(number)) },
 			isFinished: function() { return this.c.some(a => a.length == 0) || this.r.some(a => a.length == 0) }
 		},
-		simple: bs => bs.find(b => b.isFinished()),
+		easy: bs => bs.find(b => b.isFinished()),
 		hard: bs => bs.length == 1? (bs.find(b => b.isFinished())):(bs.cut(b => b.isFinished())),
 		calc: function(lines, winCon) {
 			var number, numbers = lines[0].split(",").map(n => parseInt(n));
@@ -77,27 +78,14 @@ const days = [{},
 		}
 	}, {
 		name: "Vent Lines",
-		map: line => days[5].parseLine(line.split(" -> ").map(s => s.split(","))),
-		parseLine: array => { return {
-			from: { x: parseInt(array[0][0]), y: parseInt(array[0][1]) },
-			to: { x: parseInt(array[1][0]), y: parseInt(array[1][1]) },
-			calc: function(advanced) {
-				var result = [];
-				if (this.from.x == this.to.x) for (var i = Math.min(this.from.y, this.to.y); i <= Math.max(this.from.y, this.to.y); i++) result.push(this.from.x+","+i);
-				else if (this.from.y == this.to.y) for (var i = Math.min(this.from.x, this.to.x); i <= Math.max(this.from.x, this.to.x); i++) result.push(i+","+this.from.y);
-				else if (advanced) {
-					var from = (this.from.x < this.to.x)?this.from:this.to, to = (this.from.x < this.to.x)?this.to:this.from;
-					for (var i = 0; (from.x+i) <= to.x; i++) result.push((from.x+i)+","+((from.y < to.y)?from.y+i:from.y-i));
-				}
-				return result;
-			}
-		}},
-		simple: false,
-		hard: true,
-		calc: (lines, advanced) => Object.entries(lines.collect((a,l) => l.calc(advanced).forEach(p => a[p]? a[p]++:a[p]=1))).filter(e => e[1]>=2).length
+		map: line => line.split(" -> ").map(s => s.split(",").map(s => parseInt(s))),
+		easy: (f,t) => f[0]==t[0] || f[1]==t[1],
+		hard: (f,t) => true,
+		points: (f,t) => Array.construct(Math.max(Math.abs(f[0]-t[0]),Math.abs(f[1]-t[1]))+1, i => Array.construct(2,n => f[n]+i*(f[n]>t[n]?-1:(f[n]<t[n]?1:0)))),
+		calc: (lines, valid) => Object.entries(lines.filter(l => valid(...l)).collect((a,l) => days[5].points(...l).forEach(p => a[p]?a[p]++:a[p]=1))).filter(e => e[1]>=2).length
 	}, {
 		name: "Lanternfish Growth Monitor",
-		simple: 80,
+		easy: 80,
 		hard: 256,
 		calc: (line, depth) => {
 			var f = line.split(",").map(s => parseInt(s)).collect((a,c) => a[c]++, Array(9).fill(0));
@@ -107,13 +95,14 @@ const days = [{},
 	}, {
 		name: "Crab Alignment",
 		map: line => line.split(",").map(s => parseInt(s)),
-		simple: d => d,
+		easy: d => d,
 		hard: d => d*((d+1)/2),
-		calc: (line, d) => Array(Math.max(...line)).fill().map((v,i) => line.map(n => d(Math.abs(n-i))).reduce((a,c) => a+c)).sort((a,b) => a-b)[0]
+		calc: (line, d) => Array.construct(Math.max(...line), i => line.map(n => d(Math.abs(n-i))).reduce((a,c) => a+c)).sort((a,b) => a-b)[0]
 	}
 ];
 const $id = document.getElementById.bind(document);
-const select = $id("select");
+const select = $id("select"), sample = $id("sample");
+const updateSample = ()=>sample.value = localStorage.getItem("simplygoat.aoc.sample."+select.value) || "";
 const day = new Date().getDate();
 days.forEach((e,i) => {
 	if (i == 0) return;
@@ -123,17 +112,18 @@ days.forEach((e,i) => {
 	if (i == day) opt.selected = "selected";
 	select.appendChild(opt);
 });
-$id("sample").value = localStorage.getItem("simplygoat.aoc.sample") || "";
-$id("sample").addEventListener("input", ()=>localStorage.setItem("simplygoat.aoc.sample", $id("sample").value));
+select.addEventListener("change", updateSample);
+updateSample();
 $id("button").addEventListener("click", function() {
-	var lines = $id("sample").value.split("\n");
+	localStorage.setItem("simplygoat.aoc.sample."+select.value, sample.value);
+	var lines = sample.value.split("\n");
 	if (!lines[lines.length-1].length)lines.splice(-1);
 	var time = performance.now();
 	var alg = days[select.value];
 	if (alg.map) lines = lines.map(alg.map);
 	if (lines.length == 1) lines = lines[0];
-    var run = (fun,lines) => typeof fun!="undefined"? (alg.calc? alg.calc(lines,fun):fun(lines)):"??";
-	$id("result").innerHTML = "Results: " + run(alg.simple,lines) + " / " + run(alg.hard,lines) + " (" + (performance.now()-time).toFixed(2) + "ms)";
+	var run = (fun,lines) => typeof fun!="undefined"? (alg.calc? alg.calc(lines,fun):fun(lines)):"??";
+	$id("result").innerHTML = "Results: " + run(alg.easy,lines) + " / " + run(alg.hard,lines) + " (" + (performance.now()-time).toFixed(2) + "ms)";
 });
 		</script>
 	</body>
