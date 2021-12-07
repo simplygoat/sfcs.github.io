@@ -33,20 +33,13 @@ const days = [{},
 		hard: lines => days[1].easy(lines.map((v,i,l) => (l.slice(i,i+3).reduce((a,v) => a+v))))
 	}, {
 		name: "Dive! (Submarine Control)",
-		subMarine: {
-			depth: 0, position: 0, aim: 0,
-			up: function(value) { this[this.aimed? "aim":"depth"] -= value },
-			down: function(value) { this.up(-value) },
-			forward: function(value) {
-				this.position += value;
-				if(this.aimed) this.depth += this.aim * value;
-			},
-			result: function() { return this.position * this.depth }
-		},
+		up: (v,sm) => sm[sm.aimed? "a":"y"]-=v,
+		down: (v,sm) => sm[sm.aimed? "a":"y"]+=v,
+		forward: (v,sm) => (sm.x+=v)&&(sm.aimed? sm.y+=v*sm.a:false),
 		map: line => line.split(" "),
 		easy: {},
 		hard: {aimed: true},
-		calc: (lines, temp) => lines.collect((a, c) => a[c[0]](parseInt(c[1])), Object.assign({}, days[2].subMarine, temp)).result(),
+		calc: (lines, temp) => (r=> r.x*r.y)(lines.collect((a,c) => days[2][c[0]](parseInt(c[1]),a), Object.assign({a:0,x:0,y:0}, temp)))
 	}, {
 		name: "Binary Diagnostic",
 		map: line => [...line].map(c => parseInt(c)),
