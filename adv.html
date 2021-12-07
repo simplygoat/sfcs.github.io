@@ -43,8 +43,7 @@ const days = [{},
 	}, {
 		name: "Binary Diagnostic",
 		map: line => [...line].map(c => parseInt(c)),
-		easy: lines => days[3].easyProduct(lines.reduce((a,c)=> c.map((v,i)=>v+a[i])).map(v => v > (lines.length/2)? 1:0).join("")),
-		easyProduct: r => parseInt(r,2) * (~parseInt(r,2) & (Math.pow(2,r.length)-1)),
+		easy: lines => (r => parseInt(r.join(""),2) * parseInt(r.map(l=>1-l).join(""),2))(lines.reduce((a,c)=> c.map((v,i)=>v+a[i])).map(v => v > (lines.length/2)? 1:0)),
 		hard: lines => days[3].hardFilter(lines,true)*days[3].hardFilter(lines,false),
 		hardFilter: (lines,invert) => {
 			for (var i = 0; lines.length > 1; i++) {
