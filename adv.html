@@ -97,16 +97,22 @@ const days = [{},
 		}},
 		simple: lines => days[5].calc(lines, false),
 		hard: lines => days[5].calc(lines, true),
-		calc: (lines, advanced) => Object.entries(lines.collect((a,l)=>l.calc(advanced).forEach(p => a[p]? a[p]++:a[p]=1))).filter(e => e[1] >= 2).length
+		calc: (lines, advanced) => Object.entries(lines.collect((a,l) => l.calc(advanced).forEach(p => a[p]? a[p]++:a[p]=1))).filter(e => e[1]>=2).length
 	}, {
 		name: "Lanternfish Growth Monitor",
-		simple: lines => days[6].calc(lines, 80),
-		hard: lines => days[6].calc(lines, 256),
-		calc: (lines, depth) => {
-			var f = lines[0].split(",").map(s => parseInt(s)).collect((a,c)=>a[c]++,[0,0,0,0,0,0,0,0,0]);
-			for (var i = 0; i < depth; i++) f[(7+i)%9]+=f[i%9];
-			return f.reduce((a,c)=>a+c);
+		simple: line => days[6].calc(line, 80),
+		hard: line => days[6].calc(line, 256),
+		calc: (line, depth) => {
+			var f = line.split(",").map(s => parseInt(s)).collect((a,c) => a[c]++, Array(9).fill(0));
+			for (var i = 0; i < depth; i++) f[(7+i)%9] += f[i%9];
+			return f.reduce((a,c) => a+c);
 		}
+	}, {
+		name: "Crab Alignment",
+		map: line => line.split(",").map(s => parseInt(s)),
+		simple: line => days[7].calc(line, d => d),
+		hard: line => days[7].calc(line, d => d*((d+1)/2)),
+		calc: (line, d) => Array(Math.max(...line)).fill().map((v,i) => line.map(n => d(Math.abs(n-i))).reduce((a,c) => a+c)).sort((a,b) => a-b)[0]
 	}
 ];
 const $id = document.getElementById.bind(document);
@@ -124,9 +130,11 @@ $id("sample").value = localStorage.getItem("simplygoat.aoc.sample") || "";
 $id("sample").addEventListener("input", ()=>localStorage.setItem("simplygoat.aoc.sample", $id("sample").value));
 $id("button").addEventListener("click", function() {
 	var lines = $id("sample").value.split("\n");
+	if (!lines[lines.length-1].length)lines.splice(-1);
 	var time = performance.now();
 	var alg = days[select.value];
 	if (alg.map) lines = lines.map(alg.map);
+	if (lines.length == 1) lines = lines[0];
 	var run = (fun,lines) => fun? fun(lines):"??";
 	$id("result").innerHTML = "Results: " + run(alg.simple,lines) + " / " + run(alg.hard,lines) + " (" + (performance.now()-time).toFixed(2) + "ms)";
 });
