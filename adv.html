@@ -118,7 +118,7 @@ const days = [{},
 			for (var y = 0, v = 10; y < lines.length; y++) for (var x = 0; x < lines[y].length; x++) if (lines[y][x] < 9) days[9].applyValue(lines,x,y,v++);
 			return Object.values(lines.reduce((a,c)=>a.concat(c),[]).collect((a,c)=>c>9?a[c]=(a[c]?a[c]+1:1):null)).sort((a,b)=>a-b).slice(-3).reduce((a,c)=>a*c);
 		},
-		applyValue: (a,x,y,v) => (y>=0 && y<a.length && x>=0 && x<a[y].length && a[y][x]<9)? days[9].adjacent(a,x,y).forEach(c=>days[9].applyValue(a,...c,a[y][x]=v)):null,
+		applyValue: (a,x,y,v) => a[y][x]<9? days[9].adjacent(a,x,y).forEach(c=>days[9].applyValue(a,...c,a[y][x]=v)):null,
 	}
 ];
 let $id = document.getElementById.bind(document),
