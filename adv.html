@@ -90,6 +90,42 @@ const days = [{},
 		easy: d => d,
 		hard: d => d*((d+1)/2),
 		calc: (line, d) => Array.build(Math.max(...line), i => line.map(n => d(Math.abs(n-i))).reduce((a,c) => a+c)).sort((a,b) => a-b)[0]
+	}, {
+		name: "Seven Segment Search",
+		map: line => line.split(" | ").map(p => p.split(" ").map(s => [...s].sort())),
+		easy: lines => lines.map(l => l[1].filter(s => s.length>=2&&s.length<=4||s.length==7).length).reduce((a,c)=>a+c),
+		hard: lines => lines.map(l => {
+			var dict = Array(10).fill();
+			l[0].cut(dict[1] = l[0].find(s => s.length == 2));
+			l[0].cut(dict[7] = l[0].find(s => s.length == 3));
+			l[0].cut(dict[4] = l[0].find(s => s.length == 4));
+			l[0].cut(dict[8] = l[0].find(s => s.length == 7));
+			l[0].cut(dict[6] = l[0].filter(s => s.length == 6).find(s => !dict[1].every(p => s.includes(p))));
+			l[0].cut(dict[3] = l[0].filter(s => s.length == 5).find(s => dict[1].every(p => s.includes(p))));
+			l[0].cut(dict[5] = l[0].filter(s => s.length == 5).find(s => !s.includes(dict[8].find(p => !dict[6].includes(p)))));
+			l[0].cut(dict[2] = l[0].find(s => s.length == 5));
+			l[0].cut(dict[0] = l[0].filter(s => s.length == 6).find(s => s.includes(dict[6].find(p => !dict[5].includes(p)))));
+			l[0].cut(dict[9] = l[0].find(s => s.length == 6));
+			dict = dict.map(s => s.join());
+			return parseInt(l[1].map(s => dict.indexOf(s.join())).join(""));
+		}).reduce((a,c)=>a+c)
+	}, {
+		name: "Lava Floor",
+		map: line => line.split("").map(s => parseInt(s)),
+		adjacent: (a, x, y )=> {
+			var res = [];
+			if (x > 0) res.push([x-1,y]);
+			if (x < (a[0].length-1)) res.push([x+1,y]);
+			if (y > 0) res.push([x,y-1]);
+			if (y < a.length-1) res.push([x,y+1]);
+			return res;
+		},
+		easy: lines => lines.map((r,y,l)=>r.filter((n,x)=>days[9].adjacent(l,x,y).map(c=>l[c[1]][c[0]]).every(e=>e>n)).reduce((a,c)=>a+c+1,0)).reduce((a,c)=>a+c),
+		hard: lines => {
+			for (var y = 0, v = 10; y < lines.length; y++) for (var x = 0; x < lines[y].length; x++) if (lines[y][x] < 9) days[9].applyValue(lines,x,y,v++);
+			return Object.values(lines.reduce((a,c)=>a.concat(c),[]).collect((a,c)=>c>9?a[c]=(a[c]?a[c]+1:1):null)).sort((a,b)=>a-b).slice(-3).reduce((a,c)=>a*c);
+		},
+		applyValue: (a,x,y,v) => (y>=0 && y<a.length && x>=0 && x<a[y].length && a[y][x]<9)? days[9].adjacent(a,x,y).forEach(c=>days[9].applyValue(a,...c,a[y][x]=v)):null,
 	}
 ];
 let $id = document.getElementById.bind(document),
