@@ -112,7 +112,7 @@ const days = [{},
 	}, {
 		name: "Lava Floor",
 		map: line => line.split("").map(s => parseInt(s)),
-		adjacent: (a, x, y )=> Array.of([x,y-1],[x+1,y],[x,y+1],[x-1,y]).filter(c=> c[0]>=0 && c[0]<a[0].length && c[1]>=0 && c[1]<a.length),
+		adjacent: (a, x, y )=> Array.of([x,y-1],[x+1,y],[x,y+1],[x-1,y]).filter(([x, y])=> x>=0 && x<a[0].length && y>=0 && y<a.length),
 		easy: lines => lines.map((r,y,l)=>r.filter((n,x)=>days[9].adjacent(l,x,y).map(c=>l[c[1]][c[0]]).every(e=>e>n)).reduce((a,c)=>a+c+1,0)).reduce((a,c)=>a+c),
 		hard: lines => {
 			for (var y = 0, v = 10; y < lines.length; y++) for (var x = 0; x < lines[y].length; x++) if (lines[y][x] < 9) days[9].applyValue(lines,x,y,v++);
