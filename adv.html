@@ -97,21 +97,8 @@ const days = [{},
 		name: "Seven Segment Search",
 		map: line => line.split(" | ").map(p => p.split(" ").map(s => [...s].sort())),
 		easy: lines => lines.map(l => l[1].filter(s => s.length>=2&&s.length<=4||s.length==7).length).reduce((a,c)=>a+c),
-		hard: lines => lines.map(l => {
-			var dict = Array(10).fill();
-			l[0].cut(dict[1] = l[0].find(s => s.length == 2));
-			l[0].cut(dict[7] = l[0].find(s => s.length == 3));
-			l[0].cut(dict[4] = l[0].find(s => s.length == 4));
-			l[0].cut(dict[8] = l[0].find(s => s.length == 7));
-			l[0].cut(dict[6] = l[0].filter(s => s.length == 6).find(s => !dict[1].every(p => s.includes(p))));
-			l[0].cut(dict[3] = l[0].filter(s => s.length == 5).find(s => dict[1].every(p => s.includes(p))));
-			l[0].cut(dict[5] = l[0].filter(s => s.length == 5).find(s => !s.includes(dict[8].find(p => !dict[6].includes(p)))));
-			l[0].cut(dict[2] = l[0].find(s => s.length == 5));
-			l[0].cut(dict[0] = l[0].filter(s => s.length == 6).find(s => s.includes(dict[6].find(p => !dict[5].includes(p)))));
-			l[0].cut(dict[9] = l[0].find(s => s.length == 6));
-			dict = dict.map(s => s.join());
-			return parseInt(l[1].map(s => dict.indexOf(s.join())).join(""));
-		}).reduce((a,c)=>a+c)
+		dict:[[1,2],[7,3],[4,4],[8,7],[6,(s,d)=>!d[1].every(p=>s.includes(p)),6],[3,(s,d)=>d[1].every(p=>s.includes(p)),5],[5,(s,d)=>!s.includes(d[8].find(p=>!d[6].includes(p))),5],[2,5],[0,(s,d)=>s.includes(d[6].find(p => !d[5].includes(p))),6],[9,6]],
+		hard: lines => lines.map(([s,t],x,y,dict = days[8].dict.collect((a,[i,l,f])=>s.cut(a[i]=s.filter(Number.isInteger(f)?n=>n.length==f:n=>true).find(Number.isInteger(l)?n=>n.length==l:n=>l(n,a))),Array(10).fill()).map(l=>l.join())) => parseInt(t.map(s => dict.indexOf(s.join())).join(""))).reduce((a,c)=>a+c)
 	}, {
 		name: "Lava Floor",
 		map: line => line.split("").map(s => parseInt(s)),
