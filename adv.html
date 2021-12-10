@@ -124,16 +124,9 @@ const days = [{},
 		applyValue: (a,x,y,v) => a[y][x]<9? days[9].adjacent(a,x,y).forEach(c=>days[9].applyValue(a,...c,a[y][x]=v)):null,
 	}, {
 		name: "Chunky Cave",
-		map: l => {
-			var stack = []
-			for(var i = 0; i < l.length; i++) {
-				if("<({[".indexOf(l[i])>=0) stack.push(l[i]);
-				else if	("<({[".indexOf(stack.pop()) != ">)}]".indexOf(l[i])) return l[i];
-			}
-			return stack;
-		},
-		easy: lines => lines.filter(n=>typeof n == "string").collect((a,c)=>a.r+=a[c],{r:0, ')':3, ']':57, '}':1197, '>':25137}).r,
-		hard: lines => lines.filter(n=>typeof n != "string").map(a=>a.reverse().map(n=>" ([{<".indexOf(n)).reduce((a,c)=>(a*5)+c),0).sort((a,b)=>a-b).filter((n,i,a)=>i==((a.length-1)/2))[0]
+		map: l => l.split("").reduce((a,c,i,o)=> "<({[".indexOf(c)>=0?[...a,c]:("<({[".indexOf(a.pop()) == ">)}]".indexOf(c)? a:o.splice(0)[i]),[]),
+		easy: lines => lines.filter(n=>!Array.isArray(n)).collect((a,c)=>a.r+=a[c],{r:0, ')':3, ']':57, '}':1197, '>':25137}).r,
+		hard: lines => lines.filter(n=>Array.isArray(n)).map(a=>a.reverse().map(n=>" ([{<".indexOf(n)).reduce((a,c)=>(a*5)+c),0).sort((a,b)=>a-b).filter((n,i,a)=>i==((a.length-1)/2))[0]
 	}
 ];
 let $id = document.getElementById.bind(document),
