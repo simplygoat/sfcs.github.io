@@ -18,6 +18,9 @@ Array.prototype.visit = function(visitor) {
 	this.forEach(visitor);
 	return this;
 };
+Array.prototype.log = function() {
+	return this.visit(e => console.log(e));
+};
 Array.prototype.collect = function(reduction, initial) {
 	return this.reduce((a,c) => {
 		reduction(a,c);
@@ -119,6 +122,18 @@ const days = [{},
 			return Object.values(lines.reduce((a,c)=>a.concat(c),[]).collect((a,c)=>c>9?a[c]=(a[c]?a[c]+1:1):null)).sort((a,b)=>a-b).slice(-3).reduce((a,c)=>a*c);
 		},
 		applyValue: (a,x,y,v) => a[y][x]<9? days[9].adjacent(a,x,y).forEach(c=>days[9].applyValue(a,...c,a[y][x]=v)):null,
+	}, {
+		name: "Chunky Cave",
+		map: l => {
+			var stack = []
+			for(var i = 0; i < l.length; i++) {
+				if("<({[".indexOf(l[i])>=0) stack.push(l[i]);
+				else if	("<({[".indexOf(stack.pop()) != ">)}]".indexOf(l[i])) return l[i];
+			}
+			return stack;
+		},
+		easy: lines => lines.filter(n=>typeof n == "string").collect((a,c)=>a.r+=a[c],{r:0, ')':3, ']':57, '}':1197, '>':25137}).r,
+		hard: lines => lines.filter(n=>typeof n != "string").map(a=>a.reverse().map(n=>" ([{<".indexOf(n)).reduce((a,c)=>(a*5)+c),0).sort((a,b)=>a-b).filter((n,i,a)=>i==((a.length-1)/2))[0]
 	}
 ];
 let $id = document.getElementById.bind(document),
