@@ -114,6 +114,22 @@ const days = [{},
 		map: l => [...l].reduce((a,c,i,o,p=c=>">)}]<({[".indexOf(c))=>p(c)>=4?[c,...a]:p(a.shift())-4==p(c)?a:o.splice(0)[i],[]),
 		easy: lines => lines.filter(n=>typeof n == "string").collect((a,c)=>a.r+=a[c],{r:0, ')':3, ']':57, '}':1197, '>':25137}).r,
 		hard: lines => lines.filter(Array.isArray).map(a=>a.map(n=>" ([{<".indexOf(n)).reduce((a,c)=>(a*5)+c),0).sort((a,b)=>a-b).filter((n,i,a)=>i==((a.length-1)/2))[0]
+	}, {
+		name: "Octopus Grid",
+		easy: g => days[11].steps(g,t => t.i>=100).f,
+		hard: g => days[11].steps(g,(t,grid)=> !grid.reduce((a,c)=>a+c.reduce((a,c)=>a+c),0)).i,
+		steps: (l,c,t = {i:0,f:0},g = l.map(r=>[...r].map(s => parseInt(s)))) => { while(++t.i) {
+				g.forEach((r,y,g)=>r.forEach((c,x)=>g[y][x]++));
+				g.forEach((r,y,g)=>r.forEach((c,x)=>days[11].flash(g,x,y,t,true)));
+				if (c(t, g)) return t;
+			}
+			
+		},
+		flash: (g,x,y,t,f) => {
+			if (y<0||y>=g.length||x<0||x>=g[y].length) return;
+			if (!f&&g[y][x]>0) g[y][x]++;
+			if (g[y][x]>=10&&++t.f) for (var i=g[y][x]=0; i<9; i++) days[11].flash(g,x+Math.floor(i/3)-1,y+(i%3)-1, t);
+		}
 	}
 ];
 let $id = document.getElementById.bind(document),
