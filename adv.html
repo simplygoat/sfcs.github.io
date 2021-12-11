@@ -118,18 +118,8 @@ const days = [{},
 		name: "Octopus Grid",
 		easy: g => days[11].steps(g,t => t.i>=100).f,
 		hard: g => days[11].steps(g,(t,grid)=> !grid.reduce((a,c)=>a+c.reduce((a,c)=>a+c),0)).i,
-		steps: (l,c,t = {i:0,f:0},g = l.map(r=>[...r].map(s => parseInt(s)))) => { while(++t.i) {
-				g.forEach((r,y,g)=>r.forEach((c,x)=>g[y][x]++));
-				g.forEach((r,y,g)=>r.forEach((c,x)=>days[11].flash(g,x,y,t,true)));
-				if (c(t, g)) return t;
-			}
-			
-		},
-		flash: (g,x,y,t,f) => {
-			if (y<0||y>=g.length||x<0||x>=g[y].length) return;
-			if (!f&&g[y][x]>0) g[y][x]++;
-			if (g[y][x]>=10&&++t.f) for (var i=g[y][x]=0; i<9; i++) days[11].flash(g,x+Math.floor(i/3)-1,y+(i%3)-1, t);
-		}
+		steps: (l,c,t = {i:0,f:0},g = l.map(r=>[...r].map(s => parseInt(s)))) => { while(g.forEach((r,y)=>r.forEach((c,x)=>g[y][x]++)) || g.forEach((r,y)=>r.forEach((c,x)=>days[11].flash(g,x,y,t))) || ++t.i) if (c(t,g)) return t },
+		flash: (g,x,y,t,f) => { if(y>=0 && y<g.length && x>=0 && x<g[y].length && (f&&g[y][x]>0?++g[y][x]:g[y][x])>=10 && ++t.f) for(var i=g[y][x]=0; i<9; i++) days[11].flash(g, x+Math.floor(i/3)-1, y+(i%3)-1, t, true) }
 	}
 ];
 let $id = document.getElementById.bind(document),
