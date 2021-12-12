@@ -120,6 +120,12 @@ const days = [{},
 		hard: g => days[11].steps(g,(t,grid)=> !grid.reduce((a,c)=>a+c.reduce((a,c)=>a+c),0)).i,
 		steps: (l,c,t = {i:0,f:0},g = l.map(r=>[...r].map(s => parseInt(s)))) => { while(g.forEach((r,y)=>r.forEach((c,x)=>g[y][x]++)) || g.forEach((r,y)=>r.forEach((c,x)=>days[11].flash(g,x,y,t))) || ++t.i) if (c(t,g)) return t },
 		flash: (g,x,y,t,f) => { if(y>=0 && y<g.length && x>=0 && x<g[y].length && (f&&g[y][x]>0?++g[y][x]:g[y][x])>=10 && ++t.f) for(var i=g[y][x]=0; i<9; i++) days[11].flash(g, x+Math.floor(i/3)-1, y+(i%3)-1, t, true) }
+	}, {
+		name: "Passage Pathing",
+		easy: ()=>true,
+		hard: (p,e) => e=="start"||Math.max(...Object.values(p.filter(c=>c==c.toLowerCase()).collect((a,c,v=a[c])=>a[c]=v?v+1:1)))>1,
+		calc: (lines, stop) => days[12].path(lines.collect((d,c,[f,t]=c.split("-"),a=d[f]||(d[f]=[]),b=d[t]||(d[t]=[]))=>a.push(t)&&b.push(f)),stop).length,
+		path: (d,s,p=[],e="start",l=e==e.toLowerCase())=>e=="end"?[[...p,e]]:l&&p.includes(e)&&s(p,e)?[]:d[e].collect((a,c,r=days[12].path(d,s,[...p,e],c))=>a.push(...r),[])
 	}
 ];
 let $id = document.getElementById.bind(document),
