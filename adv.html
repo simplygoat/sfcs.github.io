@@ -3,7 +3,7 @@
 		<title>Advent of Code: Solutions</title>
 	</header>
 	<body>
-		<div id="result" style="height:1em; background-color:lightgray; border:1px dashed black; padding:.2em; margin:.2em"></div>
+        <pre id="result" style="min-height:1em; background-color:lightgray; border:1px dashed black; padding:.2em; margin:.2em"></pre>
 		<select id="select"></select>
 		<input id="button" type="button" value="Start"></input>
 		<textarea id="sample" style="display:block; height:40em; width: 40em; margin-top:1em"></textarea>
@@ -126,6 +126,11 @@ const days = [{},
 		hard: (p,e) => e=="start"||Math.max(...Object.values(p.filter(c=>c==c.toLowerCase()).collect((a,c,v=a[c])=>a[c]=v?v+1:1)))>1,
 		calc: (lines, stop) => days[12].path(lines.collect((d,c,[f,t]=c.split("-"),a=d[f]||(d[f]=[]),b=d[t]||(d[t]=[]))=>a.push(t)&&b.push(f)),stop).length,
 		path: (d,s,p=[],e="start",l=e==e.toLowerCase())=>e=="end"?[[...p,e]]:l&&p.includes(e)&&s(p,e)?[]:d[e].collect((a,c,r=days[12].path(d,s,[...p,e],c))=>a.push(...r),[])
+	}, {
+		name: "Transparent Origami",
+		easy: lines => days[13].fold(lines,(v,i)=>i<1).length,
+		hard: lines => [,...days[13].fold(lines).map(k=>k.split(",").map(s=>parseInt(s))).collect((g,[x,y])=>g[y]=Array.build(Math.max(x+1,g[y].length),i=>i==x||g[y][i]),Array.build(6,()=>[])).map(l=>l.map(c=>c?"\u2588":" ").join(""))].join("<br/>"),
+		fold: (lines,f,g={},i=[],x=lines.filter(l => l.length).forEach(l => l.indexOf(",")>0?g[l]=true:i.push(/([xy])=(\d+)/.exec(l)))) => Object.keys(i.map(m=>[m[1]=="x"?0:1,m[2]]).filter(f||(n=>n)).reduce((g,[d,p])=>Object.keys(g).map(k=>k.split(",").map(s=>parseInt(s))).visit(c=>c[d]=c[d]>p?2*p-c[d]:c[d]).collect((a,c)=>a[c.join()]=true),g)),
 	}
 ];
 let $id = document.getElementById.bind(document),
