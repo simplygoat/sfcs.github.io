@@ -131,6 +131,14 @@ const days = [{},
 		easy: lines => days[13].fold(lines,(v,i)=>i<1).length,
 		hard: lines => [,...days[13].fold(lines).map(k=>k.split(",").map(s=>parseInt(s))).collect((g,[x,y])=>g[y]=Array.build(Math.max(x+1,g[y].length),i=>i==x||g[y][i]),Array.build(6,()=>[])).map(l=>l.map(c=>c?"\u2588":" ").join(""))].join("<br/>"),
 		fold: (lines,f,g={},i=[],x=lines.filter(l => l.length).forEach(l => l.indexOf(",")>0?g[l]=true:i.push(/([xy])=(\d+)/.exec(l)))) => Object.keys(i.map(m=>[m[1]=="x"?0:1,m[2]]).filter(f||(n=>n)).reduce((g,[d,p])=>Object.keys(g).map(k=>k.split(",").map(s=>parseInt(s))).visit(c=>c[d]=c[d]>p?2*p-c[d]:c[d]).collect((a,c)=>a[c.join()]=true),g)),
+	}, {
+		name: "Polymere Sequencing",
+		easy: 10,
+		hard: 40,
+		calc: (l,m,s=l[0],i=l.slice(2).map(s=>s.split(" -> ")).collect((a,[k,v])=>a[k]=[k[0]+v,v+k[1]]),r=[...s].map((c,p,o,n=o[p+1])=>n?c+n:null).collect((a,c)=>c?a[c]++:null,Object.keys(i).collect((a,k)=>a[k]=0)))=> {
+			for (var n = 0; n < m; n++) r = Object.entries(r).collect((a,[k,v])=> i[k].forEach(t=>a[t]+=v),Object.keys(i).collect((a,k)=>a[k]=0));
+			return Object.values(Object.entries(r).collect((a,[k,v])=>a[k[0]]=v+(a[k[0]]||0),[...s].slice(-1).collect((a,c)=>a[c]=1))).sort((a,b)=>b-a).filter((c,i,o)=>i==0||i==o.length-1).reduce((a,c)=>a-c);
+		}
 	}
 ];
 let $id = document.getElementById.bind(document),
