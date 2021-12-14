@@ -135,10 +135,7 @@ const days = [{},
 		name: "Polymer Pair Insertion",
 		easy: 10,
 		hard: 40,
-		calc: (l,m,s=l[0],i=l.slice(2).map(s=>s.split(" -> ")).collect((a,[k,v])=>a[k]=[k[0]+v,v+k[1]]),r=[...s].map((c,p,o,n=o[p+1])=>n?c+n:null).collect((a,c)=>c?a[c]++:null,Object.keys(i).collect((a,k)=>a[k]=0)))=> {
-			for (var n = 0; n < m; n++) r = Object.entries(r).collect((a,[k,v])=> i[k].forEach(t=>a[t]+=v),Object.keys(i).collect((a,k)=>a[k]=0));
-			return Object.values(Object.entries(r).collect((a,[k,v])=>a[k[0]]=v+(a[k[0]]||0),[...s].slice(-1).collect((a,c)=>a[c]=1))).sort((a,b)=>b-a).filter((c,i,o)=>i==0||i==o.length-1).reduce((a,c)=>a-c);
-		}
+        calc: (l,m,s=l[0],i=l.slice(2).map(s=>s.split(" -> ")).collect((a,[k,v])=>a[k]=[k[0]+v,v+k[1]]))=> ((x,y=Object.values(x))=>Math.max(...y)-Math.min(...y))(Object.entries([...Array(m)].reduce(r=>Object.entries(r).collect((a,[k,v])=>i[k].forEach(t=>a[t]=v+(a[t]||0))),[...s].slice(1).map((c,p)=>s[p]+c).collect((a,c)=>a[c]=1+(a[c]||0)))).collect((a,[k,v])=>a[k[0]]=v+(a[k[0]]||0),eval(`({${s.at(-1)}:1})`)))
 	}
 ];
 let $id = document.getElementById.bind(document),
