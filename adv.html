@@ -136,6 +136,11 @@ const days = [{},
 		easy: 10,
 		hard: 40,
         calc: (l,m,s=l[0],i=l.slice(2).map(s=>s.split(" -> ")).collect((a,[k,v])=>a[k]=[k[0]+v,v+k[1]]))=> ((x,y=Object.values(x))=>Math.max(...y)-Math.min(...y))(Object.entries([...Array(m)].reduce(r=>Object.entries(r).collect((a,[k,v])=>i[k].forEach(t=>a[t]=v+(a[t]||0))),[...s].slice(1).map((c,p)=>s[p]+c).collect((a,c)=>a[c]=1+(a[c]||0)))).collect((a,[k,v])=>a[k[0]]=v+(a[k[0]]||0),eval(`({${s.at(-1)}:1})`)))
+	}, {
+		name: "Cave Pathing",
+		map: line => line.split("").map(s => parseInt(s)),
+		easy: (g,c=g.map(r=>r.map(v=>0)),set=(x,y,cx,cy,f,v=(x,y)=>y>=0&&y<g.length&&x>=0&&x<g[y].length)=>(v(x,y)&&v(cx,cy)&&(v=c[cy][cx]+g[y][x])&&((c[y][x]&&v<c[y][x]&&(c[y][x]=v))||(f&&!c[y][x]&&(c[y][x]=v))))?(f?[[x,y-1,x,y],[x-1,y,x,y]]:[[x,y-1,x,y],[x-1,y,x,y],[x,y+1,x,y],[x+1,y,x,y]]).forEach(a=>set(...a)):null) => [...Array(g.length+g[0].length).keys()].collect((a,d)=>[...Array(d+1).keys()].forEach(i=>set(i,d-i,i,d-i-1,true)||set(i,d-i,i-1,d-i,true)),c).at(-1).at(-1),
+		hard: (g,m=(p,i)=>p+i>9?p+i-9:p+i,l=g.map(l=>Array.build(5,i=>l.map(p=>m(p,i))).reduce((a,c)=>a.concat(c))))=> days[15].easy(Array.build(5,i=>l.map(r=>r.map(p=>m(p,i)))).reduce((a,c)=>a.concat(c)))
 	}
 ];
 let $id = document.getElementById.bind(document),
