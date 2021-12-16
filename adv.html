@@ -141,6 +141,21 @@ const days = [{},
 		map: line => line.split("").map(s => parseInt(s)),
 		easy: (g,c=g.map(r=>r.map(v=>0)),set=(x,y,cx,cy,f,v=(x,y)=>y>=0&&y<g.length&&x>=0&&x<g[y].length)=>(v(x,y)&&v(cx,cy)&&(v=c[cy][cx]+g[y][x])&&((c[y][x]&&v<c[y][x]&&(c[y][x]=v))||(f&&!c[y][x]&&(c[y][x]=v))))?(f?[[x,y-1,x,y],[x-1,y,x,y]]:[[x,y-1,x,y],[x-1,y,x,y],[x,y+1,x,y],[x+1,y,x,y]]).forEach(a=>set(...a)):null) => [...Array(g.length+g[0].length).keys()].collect((a,d)=>[...Array(d+1).keys()].forEach(i=>set(i,d-i,i,d-i-1,true)||set(i,d-i,i-1,d-i,true)),c).at(-1).at(-1),
 		hard: (g,m=(p,i)=>p+i>9?p+i-9:p+i,l=g.map(l=>Array.build(5,i=>l.map(p=>m(p,i))).reduce((a,c)=>a.concat(c))))=> days[15].easy(Array.build(5,i=>l.map(r=>r.map(p=>m(p,i)))).reduce((a,c)=>a.concat(c)))
+	}, {
+		name: "Hex Packet Decoder",
+		map: l=>days[16].unpack(l.split("").flatMap(d=>parseInt("1"+d,16).toString(2).split("").slice(1))),
+		unpack: (c,l,r=(n=3)=>c.splice(0,n),i=a=>parseInt(a.join(""),2),p={v:i(r()),t:i(r())})=> {
+			if (p.t == 4) {
+				do { p.p = (p.p||[]).concat((l=r(5)).slice(1)) } while(l.at(0) == "1");
+				p.p = i(p.p);
+			} else {
+				if (i(r(1))) p.s = Array.build(i(r(11)),()=>days[16].unpack(c));
+				else for (l = r(i(r(15))), p.s=[]; l.length; p.s.push(days[16].unpack(l)));
+			}
+			return p;
+		},
+		easy: (l,c=p=>p.v+(p.s?p.s.reduce((a,s)=>a+c(s),0):0))=> c(l),
+		hard: (l,i=b=>b?1:0,r=(p,f)=>p.s.map(v).reduce(f),a=[(a,b)=>a+b,(a,b)=>a*b,(a,b)=>Math.min(a,b),(a,b)=>Math.max(a,b),,(a,b)=>i(a>b),(a,b)=>i(a<b),(a,b)=>i(a==b)],v=p=>p.p||r(p,a[p.t]))=>v(l)
 	}
 ];
 let $id = document.getElementById.bind(document),
