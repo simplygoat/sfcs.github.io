@@ -160,10 +160,7 @@ const days = [{},
 		name: "Probe Launcher",
 		map: l => (m=>[m[1],m[2],m[3],m[4]])(/x=(-?\d+)\.+(-?\d+), y=(-?\d+)\.+(-?\d+)/.exec(l)).map(s=>parseInt(s)),
 		easy: ([,,y],yi=Math.abs(y+1))=> yi*((yi+1)/2),
-		hard: ([x1,x2,y1,y2],f=((s,t)=>(2*t/s+s-1)/2),fx=x=>Math.sqrt(2*x+0.25)-1/2,g=(s,t)=>(s*((s+1)/2)>t)?fx(t):f(s,t),d={})=> {
-			for (var s=1; s<=Math.abs(y1)*2; s++) for (var x=Math.ceil(g(s,x1)); x<=Math.floor(g(s,x2)); x++) for (var y=Math.ceil(f(s,y1)); y<=Math.floor(f(s,y2)); y++) d[x+","+y]=0;
-			return Object.keys(d).length;
-		}
+		hard: ([x1,x2,y1,y2],f=(s,t)=>t/s+(s-1)/2,fx=x=>Math.sqrt(2*x+.25)-.5,g=(s,t)=>s*(s+1)/2>t?fx(t):f(s,t),d={},l=(s,e,f)=>{for(var i=s;i<=e;i++)f(i)},_=l(1,Math.abs(y1)*2,s=>l(Math.ceil(g(s,x1)),Math.floor(g(s,x2)),x=>l(Math.ceil(f(s,y1)),Math.floor(f(s,y2)),y=>d[x+","+y]=0))))=> Object.keys(d).length
 	}
 ];
 let $id = document.getElementById.bind(document),
