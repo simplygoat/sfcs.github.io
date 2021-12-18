@@ -161,6 +161,11 @@ const days = [{},
 		map: l => (m=>[m[1],m[2],m[3],m[4]])(/x=(-?\d+)\.+(-?\d+), y=(-?\d+)\.+(-?\d+)/.exec(l)).map(s=>parseInt(s)),
 		easy: ([,,y],yi=Math.abs(y+1))=> yi*((yi+1)/2),
 		hard: ([x1,x2,y1,y2],f=(s,t)=>t/s+(s-1)/2,fx=x=>Math.sqrt(2*x+.25)-.5,g=(s,t)=>s*(s+1)/2>t?fx(t):f(s,t),d={},l=(s,e,f)=>{for(var i=s;i<=e;i++)f(i)},_=l(1,Math.abs(y1)*2,s=>l(Math.ceil(g(s,x1)),Math.floor(g(s,x2)),x=>l(Math.ceil(f(s,y1)),Math.floor(f(s,y2)),y=>d[x+","+y]=0))))=> Object.keys(d).length
+	}, {
+		name: "Snailfish Math",
+		reduce: (a,$i=Array.isArray,$a=(a,v,i,r)=>$i(a[r?1-i:i])?$a(a[r?1-i:i],v,i):(a[r?1-i:i]+=v)&&false,$x=(a,d=0,x)=>{for (var p=0;p<=1;p++) if ($i(a)&&((d==3&&(x=($i(a[p])?a[p]:null))&&!(a[p]=0))||(x=$x(a[p],d+1)))) return $a(a,x[1-p],p,1)||(p?[0,x[1]]:[x[0],0]);},$s=a=>a.reduce((a,c,p,o)=>a||($i(c)&&$s(c))||(!$i(c)&&c>9&&(o[p]=[Math.floor(c/2),Math.ceil(c/2)])),false),$l=a=>{while($x(a)||$s(a));})=> $l(a)||a,
+		easy: (lines,$c=a=>a.map(n=>Array.isArray(n)?$c(n):n).reduce((a,b)=>a*3+b*2))=> $c(lines.map(l=>eval(l)).reduce((a,b)=>days[18].reduce([a].concat([b])))),
+		hard: (lines,$c=a=>a.map(n=>Array.isArray(n)?$c(n):n).reduce((a,b)=>a*3+b*2))=> lines.map((a,ia)=>lines.reduce((c,b,ib)=>ib==ia?c:Math.max(c,$c(days[18].reduce([eval(a)].concat([eval(b)])))),0)).sort((a,b)=>a-b).at(-1)
 	}
 ];
 let $id = document.getElementById.bind(document),
