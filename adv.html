@@ -197,6 +197,12 @@ const days = [{},
 			}
 			return s.length;
 		}
+	}, {
+		name: "Trench Map Enlarge",
+		map: l => l.split("").map(s=>s=="#"),
+		easy: 2,
+		hard: 50,
+		calc: (l,m,i=l[0],g=l.slice(2),$l=(l,f)=>{for(var i=0;i<l;i++)f(i);},t,r)=>$l(m,c=>!(t=[])||$l(g.length+2,_y=>t.push(r=[])&&$l(g[0].length+2,(_x,v=0)=>$l(3,dy=>$l(3,(dx,x=_x-2+dx,y=_y-2+dy)=>v=(v<<1)+(y<0||y>=g.length||x<0||x>=g[0].length?i[0]&&c%2?1:0:g[y][x]?1:0)))||r.push(i[v])))||(g=t))||g.reduce((a,c)=>a+c.reduce((a,c)=>a+c),0)
 	}
 ];
 let $id = document.getElementById.bind(document),
