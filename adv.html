@@ -174,6 +174,11 @@ const days = [{},
 		easy: 2,
 		hard: 50,
 		calc: (l,m,i=l[0],g=l.slice(2),$l=(l,f)=>{for(var i=0;i<l;i++)f(i);},t,r)=>$l(m,c=>!(t=[])||$l(g.length+2,_y=>t.push(r=[])&&$l(g[0].length+2,(_x,v=0)=>$l(3,dy=>$l(3,(dx,x=_x-2+dx,y=_y-2+dy)=>v=(v<<1)+(y<0||y>=g.length||x<0||x>=g[0].length?i[0]&&c%2?1:0:g[y][x]?1:0)))||r.push(i[v])))||(g=t))||g.reduce((a,c)=>a+c.reduce((a,c)=>a+c),0)
+	}, {
+		name: "Dirac Dice",
+		map: l => parseInt(l.split(": ")[1]),
+		easy: (l,d=i=>(i%100)+1,$s=(p,t=0,r=0,s=[0,0],_s=(s[t]+=(p[t]=(p[t]+d(r++)+d(r++)+d(r++))%10)?p[t]:10))=>_s>=1000?r*s[t?0:1]:$s(p,t?0:1,r,s))=>$s([...l]),
+		hard: (l,d=[[3,1],[4,3],[5,6],[6,7],[7,6],[8,3],[9,1]],w=[0,0],$s=(p,d,w,s=[0,0],u=1,t=0)=>d.forEach(([r,c],i,o,_p=(p[t]+r)%10,_s=s[t]+(_p?_p:10))=>_s>=21?w[t]+=u*c:t?$s([p[0],_p],d,w,[s[0],_s],u*c,0):$s([_p,p[1]],d,w,[_s,s[1]],u*c,1))) => $s(l,d,w)||Math.max(...w),
 	}
 ];
 let $id = document.getElementById.bind(document),
