@@ -179,6 +179,33 @@ const days = [{},
 		map: l => parseInt(l.split(": ")[1]),
 		easy: (l,d=i=>(i%100)+1,$s=(p,t=0,r=0,s=[0,0],_s=(s[t]+=(p[t]=(p[t]+d(r++)+d(r++)+d(r++))%10)?p[t]:10))=>_s>=1000?r*s[t?0:1]:$s(p,t?0:1,r,s))=>$s([...l]),
 		hard: (l,d=[[3,1],[4,3],[5,6],[6,7],[7,6],[8,3],[9,1]],w=[0,0],$s=(p,d,w,s=[0,0],u=1,t=0)=>d.forEach(([r,c],i,o,_p=(p[t]+r)%10,_s=s[t]+(_p?_p:10))=>_s>=21?w[t]+=u*c:t?$s([p[0],_p],d,w,[s[0],_s],u*c,0):$s([_p,p[1]],d,w,[_s,s[1]],u*c,1))) => $s(l,d,w)||Math.max(...w),
+	}, {
+		name: "Reactor Reboot Cubes",
+		points: (c,s=a=>a[1]-a[0]+1)=>c.v||(c.v=s(c.x)*s(c.y)*s(c.z)),
+		valid: (c,v=a=>a[1]>=a[0])=>v(c.x)&&v(c.y)&&v(c.z),
+		combine: (c1,c2)=>{
+			if (c1.sc) c1.sc.forEach(sc=>days[22].combine(sc,c2));
+			var o = days[22].overlap(c1,c2);
+			if (days[22].valid(o)) (c1.sc||(c1.sc=[])).push(o);
+		},
+		size: c=>days[22].points(c)-(c.sc?c.sc.map(days[22].size).reduce((a,b)=>a+b):0),
+		overlap: (c1,c2,m=([l1,h1],[l2,h2])=>[Math.max(l1,l2),Math.min(h1,h2)],c={t:c2.t})=>{return{t:c2.t,x:m(c1.x,c2.x),y:m(c1.y,c2.y),z:m(c1.z,c2.z)}},
+		map: l=>(m=>{return{t:"on"==m[1],x:[parseInt(m[2]),parseInt(m[3])],y:[parseInt(m[4]),parseInt(m[5])],z:[parseInt(m[6]),parseInt(m[7])]}})(/(on|off) x=(-?\d+)\.\.(-?\d+),y=(-?\d+)\.\.(-?\d+),z=(-?\d+)\.\.(-?\d+)/.exec(l)),
+		easy: (cubes,b={x:[-50,50],y:[-50,50],z:[-50,50]})=>cubes.map(c=>days[22].overlap(b,c)).filter(c=>days[22].valid(c)),
+		hard: cubes=>cubes,
+		calc: (lines,filter) => {
+			var cubes = [];
+			filter(lines).forEach(cube => {
+				cubes.forEach(prev=>days[22].combine(prev, cube));
+				if (cube.t) cubes.push(cube);
+			});
+			return cubes.map(days[22].size).reduce((a,b)=>a+b);
+		}
+	}, {
+		name: "Amphipod Room Planner",
+		map: l => l.split("").filter(s=>"ABCD".includes(s)),
+		easy: l => "pen",
+		hard: l => "paper"
 	}
 ];
 let $id = document.getElementById.bind(document),
