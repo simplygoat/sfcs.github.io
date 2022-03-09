@@ -191,7 +191,7 @@ if($l()){
 	$ip(_c.p);
 	_c.s.forEach(e=>$us(e.r,e.n));
 } else {
-	_n.forEach((v,i)=>$lblf("input","is first "+v,"ip"+i,$("names"),{value:"First "+v}));
+	_n.forEach((v,i)=>$lblf("input","is first "+v,"ip"+i,$("names"))&&$ce("br",$("names")));
 	$sd("init");
 }
 $("initform").onsubmit=e=>$fh("init",e,$ip);
