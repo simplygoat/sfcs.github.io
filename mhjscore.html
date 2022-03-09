@@ -1,0 +1,202 @@
+<html>
+	<head>
+		<style>
+body {
+	background-color: #73712D;
+	margin: 0px;
+	font-family: sans-serif;
+	font-size: 20pt;
+}
+table {
+	width: 90%;
+	margin: 5%;
+	background-color: #000;
+	color: #FFF;
+	border-collapse: collapse;
+	border: 5px solid #000;
+}
+tr {
+	border-top: 1px solid #666;
+	padding: .2em;
+}
+table, select, input, button { font-size: inherit }
+select, input:not([type=submit]) {
+    border: none;
+    border-bottom: 1px solid;
+	background: inherit;
+	color: inherit;
+}
+td { text-align: center }
+td[data-val]:after { content: attr(data-val) }
+td[data-val^="-"]:after {
+	color: red;
+}
+#tot {
+	border-top: 1px solid #FFF;
+	border-bottom: 1px double #FFF;
+	font-weight: bold;
+}
+#trash {
+	position: absolute;
+    right: 1em;
+    font-size: x-large;
+}
+button {
+	border: none;
+    background: inherit;
+    color: #fff;
+}
+.hide { display: none }
+.dialog {
+	position: fixed;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background:  rgba(0,0,0,0.4);
+	z-index: 9;
+}
+.dialog form{
+    width: 80%;
+    margin-top: 10%;
+    margin-left: 10%;
+	border: 1px solid #666;
+	box-shadow: 2px 2px 5px #666;
+	background-color: #FFF;
+}
+.dialog form > div {
+	padding: 1em;
+	margin-bottom: 1em;
+}
+.dialog form > div > div {
+	padding: 1em;
+	border: 1px solid #CCC;
+	border-radius: 5px;
+	margin-bottom: 1em;
+}
+h1 {
+	background-color: #666;
+	color: #FFF;
+	padding: .2em;
+	margin: 0 0 .2em;
+}
+h2 {
+	margin: -1em -1em .5em;
+    font-size: inherit;
+    background-color: #666;
+    color: #fff;
+    padding-left: .2em;
+}
+.dialog input[type=submit]{ float: right }
+.dialog input[type=number]{ width: 4em }
+.dialog label {
+	display: inline-block;
+	margin: 0 .5em;
+	white-space: nowrap;
+}
+		</style>
+	</head>
+	<body>
+		<div class="dialog hide" id="init">
+			<form id="initform">
+				<h1>setup</h1>
+				<div>
+					<div id="names">
+						<h2>player names</h2>
+					</div>
+					<input id="ir" checked type="checkbox"/><label for="ir">renchan</label><br/>
+					<input type="submit"/>
+				</div>
+			</form>
+		</div>
+		<div id="content" class="hide">
+			<h1>
+			5 player score sheet
+			<button id="trash" onClick="$r()">&#128465;</button>
+			</h1>
+			<table id="standings">
+				<tr><th></th><th id="h0"><th id="h1"/><th id="h2"/><th id="h3"/><th id="h4"/></tr>
+				<tr id="tot"><td>Total</td><td id="t0" data-val="0"/><td id="t1" data-val="0"/><td id="t2" data-val="0"/><td id="t3" data-val="0"/><td id="t4" data-val="0"/></tr>
+				<tfoot>
+					<tr><td colspan="6"><button onClick="$sr()">+add result</button></td></tr>
+				</tfoot>
+			</table>
+			<div class="dialog hide" id="result">
+				<form id="addresult">
+					<h1>result</h1>
+					<div>
+						<div id="riichi"></div>
+						<div>
+							<h2 for="wt">round ended by 
+							<select id="wt">
+								<option value="r">ron</option>
+								<option value="dr">double-ron</option>
+								<option value="tr">triple-ron</option>
+								<option value="t">tsumo</option>
+								<option value="d">draw</option>
+								<option value="c">chombo</option>
+							</select>
+							</h2>
+							<div id="resultdetails"></div>
+						</div>
+						<input type="submit"/>
+					</div>
+				</form>
+			</div>
+		</div>
+<script>
+var _c={p:[],m:[],r:0,h:0,lrb:0,s:[],ir:1},
+	_y=["1 han","2 han","3 han","4 han","mangan","haneman","baiman","sanbaiman","yakuman"],
+	_f=[20,25,30,40,50,60,70,80,90,100,110],
+	_n=["east","south","west","north","bench"],
+	_sid="simplygoat.mjs",
+	$=(n,i)=>document.getElementById(n+(typeof i != "undefined"?i:"")),
+	$ce=(t,p,o={},d=document.createElement(t))=>Object.entries(o).forEach(([k,v])=>d[k]=v)||p.appendChild(d),
+	$sd=n=>$(n).classList.remove("hide"),
+	$hd=n=>$(n).classList.add("hide"),
+	$fh=(n,e,f)=>e.preventDefault()||$hd(n)||f(),
+	$ip=(n=[0,1,2,3,4].map(v=>$("ip",v).value),_=$sd("content"))=>(_c.p=n).forEach((n,i)=>$("h",i).innerText=n),
+	$sr=()=>$sd("result")||[0,1,2,3].forEach((_,i,o,v=(i+_c.r)%5)=>_c.m[_]=v)||$urd("",$("riichi"),"b")||$urd(),
+	$us=(r,n,tr=$ce("tr",$("standings")),_=$ce("td",tr,{innerText:n||$rn()}))=>r.forEach((v,i)=>($ce("td",tr).dataset.val=v)&&($("t",i).dataset.val=parseInt($("t",i).dataset.val)+v)),
+	$rn=()=>(_c.r<5?"\u6771":"\u5357")+((_c.r%5)+1)+"-"+(_c.h+1),
+	$ar=(r=[0,0,0,0,0],t=$("wt").value,n=$rn(),_=(t!="c"&&_rh.b.c(r))||_rh[t].c(r)||!_c.ir)?(_c.h=0)||_c.r++:t=="c"||_c.h++)=>_c.s.push({n:n,r:r})&&($w()||$us(r,n)),
+	$urd=(_,p=$("resultdetails"),t=$("wt").value)=>{while(p.firstChild)p.removeChild(p.firstChild);_rh[t].i();},
+	$lblf=(t,n,i,p,o={},r=$ce(t,p,Object.assign({id:i},o)),l=n?$ce("label",p,{"for":i,innerText:n}):0)=>r,
+	$lbs=(n,i,p,o,j=[],s=$lblf("select",n,i,p))=>o.forEach((v,k)=>j.includes(k)?0:$ce("option",s,{value:k,innerText:v}))||s,
+	$nfld=(n,i,p)=>$lblf("input",n,i,p,{type:"number"}),
+	$aps=(i,n,y,p=$("resultdetails"),b=$ce("br",p),s=$lbs(n,i,p,_c.m.map((v,i)=>`${_c.p[v]} (${_n[i]})`)))=>y?($lbs(0,i+"han",p,_y).onchange=e=>$n(i+"han")>=4?$hd(i+"fu"):$sd(i+"fu"))&&$lbs(0,i+"fu",p,_f.map(f=>f+" fu"),y==1?[0]:[]):1,
+	$cs=(h,f,l=[2,3,4,6,8])=>console.log(h,f)||h>=4?l[h-4]*1000:Math.min(2000,_f[f]*Math.pow(2,3+h)),
+	$crs=s=>Math.ceil(s/100)*100,
+	$n=(n,i)=>parseInt($(n,i).value),
+	$b=(n,i)=>$(n,i).checked,
+	$w=(c=_c)=>localStorage.setItem(_sid,JSON.stringify(c)),
+	$r=()=>localStorage.removeItem(_sid)||location.reload(),
+	$l=(c=localStorage.getItem(_sid))=>c&&c.length?(_c=JSON.parse(c)):0,
+	_rh={
+		b: {i:(p=$("riichi"),_=$ce("h2",p,{innerText:"riichi bets"}))=>_c.m.forEach((v,k)=>$lblf("input",_c.p[v],"tp"+k,p,{type:"checkbox"})&&$ce("br",p)),
+			c:r=>[0,1,2,3].forEach(i=>$b("tp",i)?++_c.lrb&&(r[_c.m[i]]-=1000):0)},
+		r: {i:()=>$aps("rw","won with",1)&&$aps("rdi","dealt in"),
+			c:(r,t="rw",w=$n(t),h=$n(t,"han"),f=$n(t,"fu"),d=$n("rdi"),c=$crs($cs(h,f)*(w?4:6))+(_c.h*300),_=[(r[_c.m[w]]+=(c+_c.lrb*1000)),(r[_c.m[d]]-=c)])=>(_c.lrb=0)||w},
+		dr:{i:()=>["1st","2nd"].forEach((n,i)=>$aps("rw"+i,n+" winner with",1))||$aps("rdi","dealt in"),
+			c:r=>_rh.r.c(r,"rw0")&_rh.r.c(r,"rw1")},
+		tr:{i:()=>["1st","2nd","3rd"].forEach((n,i)=>$aps("rw"+i,n+" winner with",1))||$aps("rdi","dealt in"),
+			c:r=>_rh.r.c(r,"rw0")&_rh.r.c(r,"rw1")&_rh.r.c(r,"rw2")},
+		t: {i:()=>$aps("rw","won with",2),
+			c:(r,t="rw",w=$n(t),h=$n(t,"han"),f=$n(t,"fu"),$a=(i,w,_=(r[i]-=w))=>w,_=(r[_c.m[w]]+=_c.m.reduce((a,c,i)=>a+(i==w?0:$a(c,$crs($cs(h,f)*(!i||!w?2:1))+(_c.h*100))),0)+_c.lrb*1000))=>(_c.lrb=0)||w},
+		d: {i:(p=$("resultdetails"))=>_c.m.forEach((v,k)=>$lblf("input",_c.p[v]+" was tenpai","dtp"+k,p,{type:"checkbox"})&&$ce("br",p)),
+			c:(r,l=_c.m.map((v,i)=>$b("dtp",i)?1:0),t=l.reduce((a,c)=>a+c,0),c=t&&t<4?3000/t:0,o=t&&t<4?3000/(4-t):0)=>_c.m.forEach((v,i)=>r[v]+=($b("dtp",i)?c:-o))||!$b("dtp","0")},
+		c: {i:()=>$aps("rw","blundered"),
+			c:(r,o=$n("rw"),re=4000,rne=o?2000:4000)=>_c.m.forEach((v,i)=>r[v]+=(i==o?-re-(rne*2):i?rne:re))}
+	};
+if($l()){
+	$ip(_c.p);
+	_c.s.forEach(e=>$us(e.r,e.n));
+} else {
+	_n.forEach((v,i)=>$lblf("input","is first "+v,"ip"+i,$("names"),{value:"First "+v}));
+	$sd("init");
+}
+$("initform").onsubmit=e=>$fh("init",e,$ip);
+$("addresult").onsubmit=e=>$fh("result",e,$ar);
+$("wt").onchange=$urd;
+</script>
+	</body>
+</html>
