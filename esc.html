@@ -3,6 +3,7 @@
 body {
 	background: #445;
 	color: #cce;
+	font-family: sans-serif;
 }
 .grid {
 	display: flex;
@@ -98,7 +99,7 @@ const seed = new URLSearchParams(window.location.search).get("seed");
 const comp = "completed";
 const isOverflown = ({ clientHeight, scrollHeight, clientWidth, scrollWidth }) => scrollHeight > clientHeight || scrollWidth > clientWidth;
 const resizeText = (element, parent, base=12) => {
-	while (!isOverflown(parent) && base < 128) element.style.fontSize = `${base++}px`;
+	while (!isOverflown(parent) && base < 54) element.style.fontSize = `${base++}px`;
 	element.style.fontSize = `${base - 4}px`
 }
 const generateCell = function(content, anchor) {
