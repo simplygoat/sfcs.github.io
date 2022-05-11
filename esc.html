@@ -1,0 +1,131 @@
+<html>
+<style>
+body {
+	background: #445;
+	color: #cce;
+}
+.grid {
+	display: flex;
+	flex-wrap: wrap;
+}
+.grid > div {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	width: 18vw;
+	height: 18vw;
+	border: .1vw solid #cce;
+	margin: .2vw;
+}
+.grid > div.completed {
+	background-color: #4a4;
+	color: #cfc;
+	border-color: #cfc;
+}
+</style>
+<body>
+	<h1>ESC Bingo!</h1>
+	<div class="segment">
+		<h2>Performances</h2>
+		<div class="grid" id="perf">
+		</div>
+	</div>
+	<div class="segment">
+		<h2>Voting</h2>
+		<div class="grid" id="vote">
+		</div>
+	</div>
+<script>
+const sc = [
+	"Anything Ukraine/Russia war",
+	"BONKERS costume",
+	"Traditional country-specific outfit",
+	"Flag face-paint",
+	"Fire",
+	"Fog",
+	"Wind",
+	"Anything Covid",
+	"Song about Peace",
+	"Rapping",
+	"Costume change",
+	"5 or more performers on stage",
+	"Blowing kisses to the camera",
+	"Birdseye camera",
+	"Language change",
+	"Glitter",
+	"Over the top visuals",
+	"Ballad with minimal visuals",
+	"Absurd instrument",
+	"Forgettable song",
+	"Sobstory",
+	"Morphsuit",
+	"Blowing kisses to the camera",
+	"Background dancer stealing the show",
+	"Kneeling / laying down",
+	"Visibly sweating / out of breath",
+	"Feathers / Wings"
+];
+const pt = [
+	"French people talking only french",
+	"Britain gets at least 1 point",
+	"Germany gets at least 1 point",
+	"The clear favorite doesn't get points",
+	"Thanking the hosts for a 'wonderful' show",
+	"Greeting in native language",
+	"'In these difficult times' or similar",
+	"Cringeworthy joke",
+	"Actually funny joke",
+	"Blatant political vote",
+	"Connection Issue/Dead Air",
+	"Non-Italian talking in Italian",
+	"Pointless rambling",
+	"Audience booing",
+	"12 points to a neighbouring country",
+	"8+ points to Ukraine",
+	"Political comment",
+	"Green-screen with famous landmark",
+	"Singing / Quoting the 12 points song",
+	"Mentioning Pizza or Pasta",
+	"Drinking on camera",
+	"Prop-Comedy",
+	"Comments about appearance / outfits",
+	"Anything LGBTQ+",
+	"Non-French person talking French",
+	"Personal favorite gets 12 points"
+];
+const seed = new URLSearchParams(window.location.search).get("seed");
+const comp = "completed";
+const isOverflown = ({ clientHeight, scrollHeight, clientWidth, scrollWidth }) => scrollHeight > clientHeight || scrollWidth > clientWidth;
+const resizeText = (element, parent, base=12) => {
+	while (!isOverflown(parent) && base < 128) element.style.fontSize = `${base++}px`;
+	element.style.fontSize = `${base - 4}px`
+}
+const generateCell = function(content, anchor) {
+	var parent = document.createElement("div");
+	var element = document.createElement("span");
+	element.innerText = content;
+	anchor.appendChild(parent);
+	parent.appendChild(element);
+	parent.addEventListener("click",e=>parent.className=(parent.className==comp?"":comp));
+	resizeText(element, parent);
+}
+const generateBoard = function(seed=[], array, anchor) {
+	while(seed.length < 25) seed += seed;
+	[...seed.substring(0,25)]
+		.map(s=>s.charCodeAt(0)-97)
+		.map(s=>array.splice(s%array.length, 1)[0])
+		.forEach(c => generateCell(c, anchor));
+}
+if (!seed) {
+	var seedString = "?seed=";
+	for (var i = 0; i < 25; i++) {
+		seedString += String.fromCharCode(97 + Math.floor(Math.random() * 26));
+	}
+	window.location.search += seedString;
+}
+generateBoard(seed, sc, document.getElementById("perf"));
+generateBoard(seed, pt, document.getElementById("vote"));
+</script>
+</body>
+</html>
