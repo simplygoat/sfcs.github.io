@@ -11,7 +11,7 @@ https://simplygoat.github.io/esc.html
 ## Fate Accelerated Sheet
 https://simplygoat.github.io/fate.html
 
-## Worlde for Mahjong
+## Wordle for Mahjong
 https://simplygoat.github.io/jongle.html
 
 ## Scoring tracker for 5-player riichi
