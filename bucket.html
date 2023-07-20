@@ -1,0 +1,90 @@
+<html>
+<head>
+<title>D4 Bucket Value</title>
+<style>
+.hide { display: none !important; }
+.table { display: table; }
+.table > div { display: table-row; }
+.table > div > span {
+	display: table-cell;
+	padding: 0.1em
+}
+.bold {
+	font-weight: bold;
+	margin-top: .2em;
+}
+input[type="submit"] { float: right; }
+input[type="number"] { width: 8em; }
+</style>
+</head>
+<body>
+<form class="table">
+	<div class="bold">
+		<span>Stat Name</span>
+		<span>Current Value</span>
+		<span>Affix Roll</span>
+	</div>
+	<div>
+		<span>Critical Chance</span>
+		<span><input type="number" name="chc" required="true" step="0.1" value="5" max="100"/></span>
+		<span><input type="number" name="corr-chc" required="true" step="0.1" value="5"/></span>
+	</div>
+	<div>
+		<span>Critical Damage</span>
+		<span><input type="number" name="chd" required="true" step="0.1" value="50" /></span>
+		<span><input type="number" name="corr-chd" required="true" step="0.1" value="17.5"/></span>
+	</div>
+	<div>
+		<span>Vulnerable Damage</span>
+		<span><input type="number" name="vd" required="true" step="0.1" value="0"/></span>
+		<span><input type="number" name="corr-vd" required="true" step="0.1" value="14"/></span>
+	</div>
+	<div>
+		<span>Basic Damage</span>
+		<span><input type="number" name="bd" required="true" step="0.1" value="0"/></span>
+		<span><input type="number" name="corr-bd" required="true" step="0.1" value="23.5"/></span>
+	</div>
+	<div>
+		<span>Main Stat</span>
+		<span><input type="number" name="ms" required="true" value="200"/></span>
+		<span><input type="number" name="corr-ms" required="true" step="0.1" value="52"/></span>
+	</div>
+	<div>
+		<span></span>
+		<span></span>
+		<span><input type="submit" value="calculate"/></span>
+	</div>
+</form>
+<div id="result" class="table hide">
+	<div><span>Effecitve Multiplier</span><span id="apm"></span></div>
+	<div class="bold"><span>Stat Name</span><span>Relative Increase</span></div>
+	<div><span>Critical Chance</span><span id="chc"></span></div>
+	<div><span>Critical Damage</span><span id="chd"></span></div>
+	<div><span>Vulnerable Damage</span><span id="vd"></span></div>
+	<div><span>Basic Damage</span><span id="bd"></span></div>
+	<div><span>Main Stat</span><span id="ms"></span></div>
+</div>
+<script>
+const input = {};
+const p=(v,f,p=parseFloat(v)/100.0)=>f?1.0+p:p;
+const dmg = ({chc,chd,vd,bd,ms})=>p(ms/10,1)*p(bd,1)*(1.0+p(chd)*Math.min(1,p(chc)))*p(vd+20,1);
+const fOp = (fun,fil,e=document.querySelector("form").elements)=>{for (let i=0; i<e.length; i++) if(e[i].name) fun(e[i]);}
+const put = (name, v=Object.assign({},input), b=dmg(v)) => {
+	if (typeof input[name] != "undefined") {
+		v[name]+=parseFloat(input["corr-"+name]);
+		b = ((dmg(v) - b)/b);
+	}
+	document.getElementById(name).innerText = (b*100).toFixed(2) + "%";
+};
+document.querySelector("form").addEventListener("submit", (event) => {
+	fOp(e=>input[e.name]=parseFloat(e.value));
+	localStorage.setItem("d4:bucket:data", JSON.stringify(input));
+	document.getElementById("result").classList.remove("hide");
+	["apm","chc","chd","vd","bd","ms"].forEach(n=>put(n));
+	event.preventDefault();
+});
+let s = localStorage.getItem("d4:bucket:data");
+if (s && (s=JSON.parse(s))) fOp(e=>e.value=s[e.name]);
+</script>
+</body>
+</html>
